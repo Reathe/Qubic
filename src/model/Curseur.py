@@ -1,5 +1,6 @@
-from operator import add
 from typing import Tuple
+
+from src.model.Direction import add_dir
 
 
 class Curseur:
@@ -45,8 +46,7 @@ class Curseur:
 		return self._pos_max
 
 	def __add__(self, pos: Tuple[int, int, int]) -> 'Curseur':
-		x, y, z = tuple(map(add, self.pos, pos))
-		return Curseur((x, y, z), self.pos_max)
+		return Curseur(add_dir(self.pos, pos), self.pos_max)
 
 	def __iadd__(self, vect: Tuple[int, int, int]) -> 'Curseur':
 		"""
@@ -55,8 +55,7 @@ class Curseur:
 		Args:
 		 vect:
 		"""
-		p = (_, _, _) = tuple(map(add, self.pos, vect))
-		self.pos = p
+		self.pos = add_dir(self.pos, vect)
 		return self
 
 	def valid_pos(self, pos: Tuple[int, int, int]) -> bool:
@@ -72,10 +71,11 @@ class Curseur:
 	def move(self, vect: Tuple[int, int, int]) -> 'Curseur':
 		"""
 		Déplace le curseur, la nouvelle pos devient pos+vect, élément par élément
+
 		Args:
 		 vect: le vect
 		"""
 		return self.__iadd__(vect)
 
-	def __str__(self):
+	def __repr__(self):
 		return 'Curseur[pos: {}, pos_max: {}]'.format(self.pos, self.pos_max)
