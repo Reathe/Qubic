@@ -81,7 +81,7 @@ class Curseur:
 		else:
 			raise StopIteration
 
-	def valid_pos(self, pos: Tuple[int, int, int]) -> bool:
+	def valid_pos(self, pos: Union[Tuple[int, int, int], 'Curseur']) -> bool:
 		"""
 		Une position est valide si 0 <= pos < pos_max, élément par élément
 
@@ -89,6 +89,7 @@ class Curseur:
 			pos: La position à tester
 		Returns: si la position est valide
 		"""
+		pos = pos[0], pos[1], pos[2]
 		return all(max_val > val >= 0 for val, max_val in zip(pos, self.pos_max))
 
 	def move(self, vect: Tuple[int, int, int]) -> 'Curseur':
