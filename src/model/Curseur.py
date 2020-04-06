@@ -46,7 +46,7 @@ class Curseur:
 		return self._pos_max
 
 	def __add__(self, pos: Tuple[int, int, int]) -> 'Curseur':
-		return Curseur(add_dir(self.pos, pos), self.pos_max)
+		return Curseur(self.pos_max, add_dir(self.pos, pos))
 
 	def __iadd__(self, vect: Tuple[int, int, int]) -> 'Curseur':
 		"""

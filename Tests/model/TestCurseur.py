@@ -30,6 +30,19 @@ class MyTestCase(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			c += (0, 4, 0)
 
+	def test_add(self):
+		for c in [Curseur(pos_max=(1, 1, 1))]:
+			for d in [(0, 1, 0), (0, -1, 0)]:
+				with self.subTest("{} + {}".format(c, d)):
+					with self.assertRaises(ValueError):
+						c + d
+
+		for c in [Curseur(pos_max=(4, 4, 4))]:
+			for d in [(1, 3, 5), (0, 4, 0)]:
+				with self.subTest("{} + {}".format(c, d)):
+					with self.assertRaises(ValueError):
+						c + d
+
 	def test_get_set_item(self):
 		c = Curseur(pos_max=(4, 4, 4))
 		with self.assertRaises(ValueError):
