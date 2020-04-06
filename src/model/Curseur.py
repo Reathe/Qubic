@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from src.model.Direction import add_dir
 
@@ -57,6 +57,29 @@ class Curseur:
 		"""
 		self.pos = add_dir(self.pos, vect)
 		return self
+
+	def __getitem__(self, key: Union[str, int], in_pos_max: bool = False):
+		nuple = self.pos_max if in_pos_max else self.pos
+		real_key = {'x': 0, 'y': 1, 'z': 2, 0: 0, 1: 1, 2: 2}
+		return nuple[real_key[key]]
+
+	def __setitem__(self, key, value):
+		real_key = {'x': 0, 'y': 1, 'z': 2, 0: 0, 1: 1, 2: 2}
+		res = list(self.pos)
+		res[real_key[key]] = value
+		self.pos = tuple(res)
+
+	def __iter__(self):
+		self.__it = 0
+		return self
+
+	def __next__(self):
+		x = self.__it
+		if x < 3:
+			self.__it += 1
+			return self.pos[x]
+		else:
+			raise StopIteration
 
 	def valid_pos(self, pos: Tuple[int, int, int]) -> bool:
 		"""

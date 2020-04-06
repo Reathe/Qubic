@@ -30,6 +30,24 @@ class MyTestCase(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			c += (0, 4, 0)
 
+	def test_get_set_item(self):
+		c = Curseur(pos_max=(4, 4, 4))
+		with self.assertRaises(ValueError):
+			c['y'] = 5
+		self.assertTrue(c["y"] == 0)
+		self.assertTrue(c["z"] == 0)
+		c['y'] = 2
+		self.assertTrue((0, 2, 0) == c.pos)
+
+	def test_iterator(self):
+		test_curs = Curseur(pos_max=(4, 4, 4)), Curseur(pos=(0, 3, 1), pos_max=(4, 4, 4))
+		for c in test_curs:
+			ind = 0
+			for i in c:
+				with self.subTest("test: {}\n{}[{}] == {}\n".format(c, c.pos, ind, i)):
+					self.assertTrue(i == c.pos[ind])
+				ind += 1
+
 
 if __name__ == '__main__':
 	unittest.main()
