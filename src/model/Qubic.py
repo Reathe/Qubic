@@ -3,14 +3,15 @@ from typing import Tuple, List, Optional, Union
 import itertools
 import numpy
 
+from QubicSubject import QubicSubject
 from model.Curseur import Curseur
-from model.Direction import DROITE, HAUT, DEVANT, mult_dir, add_dir
+from model.Direction import DROITE, HAUT, DEVANT, mult_dir, add_dir, BAS
 from model.Pion.Pion import Pion
 from model.Pion.PionBlanc import PionBlanc
 from model.Pion.PionNoir import PionNoir
 
 
-class Qubic:
+class Qubic(QubicSubject):
 	"""
 	Les blancs commencent toujours... Comme aux échecs :)
 	"""
@@ -21,6 +22,7 @@ class Qubic:
 	_fini: bool
 
 	def __init__(self, taille: int = 4, gravite: bool = True):
+		super().__init__()
 		self._plateau = Qubic.__start_plateau(taille)
 		self._posable = Qubic.__start_posable(taille)
 		self._pose = []
@@ -85,6 +87,7 @@ class Qubic:
 			move = pos
 			self._posable.remove(move)
 			self._pose.append(move)
+			self.notify_observers()
 
 	def tour_blanc(self) -> bool:
 		"""
@@ -106,6 +109,7 @@ class Qubic:
 			last = self._pose.pop()
 			self._posable.append(last)
 			self.plateau[last[0]][last[1]][last[2]] = None
+			self.notify_observers()
 
 	@staticmethod
 	def __start_plateau(taille) -> List[List[List[Optional[Pion]]]]:
