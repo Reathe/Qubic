@@ -77,10 +77,7 @@ class Qubic(QubicSubject):
 		"""
 		pos = pos[0], pos[1], pos[2]
 		if self._gravite:
-			pion_sous = self.get_pion((pos[0], pos[1] - 1, pos[2]))
-			while pos[1] > 0 and pion_sous is None:
-				pos = (pos[0], pos[1] - 1, pos[2])
-				pion_sous = self.get_pion((pos[0], pos[1] - 1, pos[2]))
+			pos = self.get_pos_with_gravity(pos)
 		if self.get_pion(pos) is None:
 			pion_tour_blanc = {True: PionBlanc(), False: PionNoir()}
 			self._plateau[pos[0]][pos[1]][pos[2]] = pion_tour_blanc.get(self.tour_blanc())
@@ -88,6 +85,21 @@ class Qubic(QubicSubject):
 			self._posable.remove(move)
 			self._pose.append(move)
 			self.notify_observers()
+
+	def get_pos_with_gravity(self, pos: Tuple[int, int, int]) -> Tuple[int, int, int]:
+		"""
+		Donne la position si le pion tombait jusqu'à ce qu'il rencontre sois le bas du plateau, soit un pion
+
+		Args:
+			pos: la position de départ
+
+		Returns: la position tombee
+		"""
+		pion_sous = self.get_pion(add_dir(pos, BAS))
+		while pos[1] > 0 and pion_sous is None:
+			pos = add_dir(pos, BAS)
+			pion_sous = self.get_pion(add_dir(pos, BAS))
+		return pos
 
 	def tour_blanc(self) -> bool:
 		"""
