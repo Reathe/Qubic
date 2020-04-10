@@ -4,6 +4,7 @@ from ursina import *
 
 from QubicObserver import QubicObserver
 from UI.Qubic.VuePion.VuePion import VuePion
+from UI.Qubic.VuePion.VuePionFactory import VuePionFactory
 
 
 class Sol(Button):
@@ -17,8 +18,8 @@ class Sol(Button):
 		)
 
 	def on_click(self):
-		pos = tuple(self.position + Vec3(0, 1, 0))
-		pos = int(pos[0]), int(pos[0]), int(pos[2])
+		pos = tuple(self.position + Vec3(0, len(self.qubic), 0))
+		pos = int(pos[0]), int(pos[1]), int(pos[2])
 		pos = self.qubic.get_pos_with_gravity(pos)
 		print(pos)
 		self.qubic.poser(pos)
@@ -27,7 +28,7 @@ class Sol(Button):
 class VueQubicSettings:
 	def __init__(self):
 		self.center = None
-		self.vue_pion = VuePion
+		self.vue_pion = 'Classic'
 
 
 class VueQubic(Entity, QubicObserver):
@@ -55,6 +56,6 @@ class VueQubic(Entity, QubicObserver):
 				for z in range(len(qubic)):
 					pion = qubic.plateau[x][y][z]
 					if pion and self.pions[x][y][z] is None:
-						self.pions[x][y][z] = self.settings.vue_pion(qubic, position=(x, y, z), parent=self)
+						self.pions[x][y][z] = VuePionFactory(qubic, self.settings.vue_pion).create_pion((x, y, z))
 					elif pion is None and self.pions[x][y][z]:
 						destroy(self.pions[x][y][z])
