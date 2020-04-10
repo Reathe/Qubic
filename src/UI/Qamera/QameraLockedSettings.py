@@ -1,4 +1,5 @@
 from math import pi
+import json
 
 
 class QameraLockedSettings:
@@ -8,7 +9,6 @@ class QameraLockedSettings:
 		self.start_r = None
 		self.sensibilite = None
 		self.zoom_sensibilite = None
-		self.default()
 
 	def default(self):
 		self.start_alpha = 3 * pi / 4
@@ -17,9 +17,20 @@ class QameraLockedSettings:
 		self.sensibilite = 1
 		self.zoom_sensibilite = 5
 
-	# TODO: ça
 	def save(self):
-		pass
+		print("Saving camera locked settings...")
+		try:
+			with open('QameraLockedSettings.json', 'w') as file:
+				json.dump(self.__dict__, file)
+		except:
+			print("Failed to save")
+			raise IOError
 
 	def load(self):
-		pass
+		print("Loading camera locked settings...")
+		try:
+			with open('QameraLockedSettings.json', 'r') as file:
+				self.__dict__ = json.load(file)
+		except:
+			print("Failed")
+			raise IOError
