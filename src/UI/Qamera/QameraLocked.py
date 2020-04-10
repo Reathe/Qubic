@@ -34,7 +34,12 @@ class QameraLocked(Qamera):
 		self.beta = None
 		self.rayon = None
 		self.__settings = QameraLockedSettings()
-		self.set_default_settings()
+		try:
+			self.load_settings()
+		except:
+			self.set_default_settings()
+			self.save_settings()
+
 		self.update_pos()
 
 	@property
@@ -108,6 +113,10 @@ class QameraLocked(Qamera):
 			self.rayon -= self.__settings.zoom_sensibilite
 		elif key == 'scroll down':
 			self.rayon += self.__settings.zoom_sensibilite
+		elif key == 's':
+			stgs = self.__settings
+			stgs.start_alpha, stgs.start_beta, stgs.start_r = self.alpha, self.beta, self.rayon
+			self.save_settings()
 
 	def set_default_settings(self):
 		self.__settings.default()
@@ -119,6 +128,8 @@ class QameraLocked(Qamera):
 
 	def load_settings(self):
 		self.__settings.load()
+		self.reset_to_start()
+		self.update_pos()
 
 
 """main pour tester la camera"""
