@@ -14,7 +14,7 @@ class VuePion(Button):
 
 	def on_click(self):
 		pos = tuple(self.position + (0, 1, 0))
-		pos = int(pos[0]), int(pos[0]), int(pos[2])
+		pos = int(pos[0]), int(pos[1]), int(pos[2])
 		pos = self.qubic.get_pos_with_gravity(pos)
 		print(pos)
 		self.qubic.poser(pos)
