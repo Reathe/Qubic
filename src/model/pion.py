@@ -22,3 +22,11 @@ class Pion(ABC):
 	@classmethod
 	def repr(cls):
 		return cls.__name__
+
+
+class PionBlanc(Pion):
+	pass
+
+
+class PionNoir(Pion):
+	pass

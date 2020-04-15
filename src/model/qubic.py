@@ -1,14 +1,11 @@
 from typing import Tuple, List, Optional, Union
 
 import itertools
-import numpy
 
-from QubicSubject import QubicSubject
-from model.Curseur import Curseur
-from model.Direction import DROITE, HAUT, DEVANT, mult_dir, add_dir, BAS
-from model.Pion.Pion import Pion
-from model.Pion.PionBlanc import PionBlanc
-from model.Pion.PionNoir import PionNoir
+from qubic_subject import QubicSubject
+from model.curseur import Curseur
+from model.direction_tools import DROITE, HAUT, DEVANT, mult_dir, add_dir, BAS
+from model.pion import PionBlanc, PionNoir, Pion
 
 
 class Qubic(QubicSubject):
@@ -189,11 +186,3 @@ class Qubic(QubicSubject):
 	@property
 	def posable(self):
 		return self._posable
-
-
-def to_1d(pos, pos_max) -> int:
-	return int(numpy.ravel_multi_index(pos, pos_max))
-
-
-def to_3d(ind, pos_max):
-	return numpy.unravel_index(ind, pos_max)

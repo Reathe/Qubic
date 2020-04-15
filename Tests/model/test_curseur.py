@@ -1,9 +1,9 @@
 import unittest
 
-from src.model.Curseur import Curseur
+from src.model.curseur import Curseur
 
 
-class MyTestCase(unittest.TestCase):
+class TestCurseur(unittest.TestCase):
 	def test_init(self):
 		with self.assertRaises(ValueError):
 			Curseur((5, 0, 5))

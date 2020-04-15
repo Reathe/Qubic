@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 
-from src.model.Direction import add_dir
+from src.model.direction_tools import add_dir
 
 
 class Curseur:

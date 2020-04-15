@@ -2,12 +2,11 @@ from typing import List, Optional
 
 from ursina import *
 
-from QubicObserver import QubicObserver
-from UI.Qubic.VuePion.VuePion import VuePion
-from UI.Qubic.VuePion.VuePionFactory import VuePionFactory
+from qubic_observer import QubicObserver
+from ui.qubic.vue_pion import VuePion, VuePionFactory
 
 
-class Sol(Button):
+class _Sol(Button):
 	def __init__(self, qubic, **kwargs):
 		self.qubic = qubic
 		super().__init__(
@@ -21,11 +20,10 @@ class Sol(Button):
 		pos = tuple(self.position + Vec3(0, len(self.qubic), 0))
 		pos = int(pos[0]), int(pos[1]), int(pos[2])
 		pos = self.qubic.get_pos_with_gravity(pos)
-		print(pos)
 		self.qubic.poser(pos)
 
 
-class VueQubicSettings:
+class _VueQubicSettings:
 	def __init__(self):
 		self.center = None
 		self.vue_pion = 'Classic'
@@ -42,11 +40,11 @@ class VueQubic(Entity, QubicObserver):
 		taille = len(qubic)
 		self.qubic = qubic
 		qubic.add_observers(self)
-		self.settings = VueQubicSettings()
+		self.settings = _VueQubicSettings()
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		for z in range(taille):
 			for x in range(taille):
-				Sol(self.qubic, position=(x, -1, z), parent=self)
+				_Sol(self.qubic, position=(x, -1, z), parent=self)
 
 	# print("rota: {}".format(self.plateau))
 

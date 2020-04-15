@@ -1,24 +1,11 @@
 from typing import Tuple
+import json
 
 from math import cos, sin, pi
 from ursina import *
 
-from UI.Qamera.Qamera import Qamera
-from UI.Qamera.QameraLockedSettings import QameraLockedSettings
-from model.Direction import mult_dir
-
-
-# noinspection PyTypeChecker
-def print_infos(cam):
-	print()
-	print('parents: {}'.format(cam.parent))
-	print('world_pos: {}'.format(cam.world_position))
-	print('pos: {}'.format(cam.position))
-	print('rayon: {0:.0f}'.format(cam.rayon))
-	print('world_rotation: {}'.format(mult_dir(1 / pi, mult_dir(pi / 180, cam.world_rotation))))
-	print('rotation: {}'.format(mult_dir(1 / pi, mult_dir(pi / 180, cam.rotation))))
-	print('alpha: {0:.2f}, beta: {1:.2f}'.format(cam.alpha / pi, cam.beta / pi))
-	print('x:{0:.2f}, y:{1:.2f}, z:{2:.2f}'.format(cam.x, cam.y, cam.z))
+from model.direction_tools import mult_dir
+from ui.qamera.qamera import Qamera
 
 
 class QameraLocked(Qamera):
@@ -130,6 +117,53 @@ class QameraLocked(Qamera):
 		self.__settings.load()
 		self.reset_to_start()
 		self.update_pos()
+
+
+class QameraLockedSettings:
+	def __init__(self):
+		self.start_alpha = None
+		self.start_beta = None
+		self.start_r = None
+		self.sensibilite = None
+		self.zoom_sensibilite = None
+
+	def default(self):
+		self.start_alpha = 3 * pi / 4
+		self.start_beta = pi / 4
+		self.start_r = 20
+		self.sensibilite = 1
+		self.zoom_sensibilite = 5
+
+	def save(self):
+		print("Saving camera locked settings...")
+		try:
+			with open('QameraLockedSettings.json', 'w') as file:
+				json.dump(self.__dict__, file)
+		except:
+			print("Failed to save")
+			raise IOError
+
+	def load(self):
+		print("Loading camera locked settings...")
+		try:
+			with open('QameraLockedSettings.json', 'r') as file:
+				self.__dict__ = json.load(file)
+		except:
+			print("Failed")
+			raise IOError
+
+
+# noinspection PyTypeChecker
+def print_infos(qam):
+	print()
+	print('parents: {}'.format(qam.parent))
+	print('world_pos: {}'.format(qam.world_position))
+	print('pos: {}'.format(qam.position))
+	print('rayon: {0:.0f}'.format(qam.rayon))
+	print('world_rotation: {}'.format(mult_dir(1 / pi, mult_dir(pi / 180, qam.world_rotation))))
+	print('rotation: {}'.format(mult_dir(1 / pi, mult_dir(pi / 180, qam.rotation))))
+	print('alpha: {0:.2f}, beta: {1:.2f}'.format(qam.alpha / pi, qam.beta / pi))
+	print('x:{0:.2f}, y:{1:.2f}, z:{2:.2f}'.format(qam.x, qam.y, qam.z))
 
 
 """main pour tester la camera"""

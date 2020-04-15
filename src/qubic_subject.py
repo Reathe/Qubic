@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import List
 
-from QubicObserver import QubicObserver
+from qubic_observer import QubicObserver
 
 
 class QubicSubject(ABC):

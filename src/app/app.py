@@ -1,8 +1,8 @@
 from ursina import *
 
-from UI.Qamera.QameraLocked import QameraLocked
-from UI.Qubic.VueQubic import VueQubic
-from model.Qubic import Qubic
+from model.qubic import Qubic
+from ui.qubic.vue_qubic import VueQubic
+from ui.qamera.qamera_locked import QameraLocked
 
 if __name__ == '__main__':
 	app = Ursina()

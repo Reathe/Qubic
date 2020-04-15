@@ -1,10 +1,10 @@
 import unittest
 
-from model.Curseur import Curseur
-from model.Qubic import Qubic
+from model.curseur import Curseur
+from model.qubic import Qubic
 
 
-class MyTestCase(unittest.TestCase):
+class TestQubic(unittest.TestCase):
 	def test_poser(self):
 		pass
 
