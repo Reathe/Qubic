@@ -25,6 +25,7 @@ class _Sol(Button):
 
 class _VueQubicSettings:
 	def __init__(self):
+		super().__init__()
 		self.center = None
 		self.vue_pion = 'Classic'
 
@@ -32,8 +33,8 @@ class _VueQubicSettings:
 class VueQubic(Entity, QubicObserver):
 	pions: List[List[List[Optional[VuePion]]]]
 
-	def __new__(cls, qubic, **kwargs):
-		return Entity.__new__(cls, **kwargs)
+	def __init__(self, qubic, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 
 	def __init__(self, qubic, **kwargs):
 		super().__init__(**kwargs)

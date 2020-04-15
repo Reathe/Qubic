@@ -2,13 +2,8 @@ from abc import ABC, abstractmethod
 
 
 class QubicObserver(ABC):
-	def __new__(cls):
-		if cls is QubicObserver:
-			raise TypeError('Abstract class cannot be instantiatied')
-		return object.__new__(cls)
-
-	def __init__(self):
-		pass
+	def __init__(self, *args, **kwargs):
+		super().__init__()
 
 	@abstractmethod
 	def notify(self, qubic):

@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from ursina import *
 
 
-class Qamera(Entity, ABC):
-	def __init__(self, **kwargs):
-		super().__init__(name='qamera', **kwargs)
+class Qamera(ABC, Entity):
+	def __init__(self, *args, **kwargs):
+		super().__init__(name='qamera', *args, **kwargs)
 
 	@abstractmethod
 	def set_default_settings(self):

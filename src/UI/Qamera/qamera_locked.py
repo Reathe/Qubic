@@ -13,8 +13,8 @@ class QameraLocked(Qamera):
 	Une caméra qui tourne autour d'un cible. La cible est (0,0,0) par défaut.
 	"""
 
-	def __init__(self, **kwargs):
-		super().__init__(**kwargs)
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 		camera.parent = self
 		camera.position = (0, 0, 0)
 		self.alpha = None
@@ -121,6 +121,7 @@ class QameraLocked(Qamera):
 
 class QameraLockedSettings:
 	def __init__(self):
+		super().__init__()
 		self.start_alpha = None
 		self.start_beta = None
 		self.start_r = None

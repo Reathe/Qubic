@@ -4,11 +4,11 @@ from model.pion import PionBlanc
 
 
 class VuePion(Entity):
-	def __init__(self, position, qubic, **kwargs):
+	def __init__(self, position, qubic, *args, **kwargs):
 		self.qubic = qubic
 		super().__init__(
 			position=position,
-			**kwargs
+			*args, **kwargs
 		)
 
 
@@ -19,6 +19,7 @@ class VuePionFactory:
 			pion: le type de pion (le skin)
 			qubic: le qubic
 		"""
+		super().__init__()
 		pion_types = {'Classic': self.create_classic}
 		self.create_pion = pion_types.get(pion)
 		self.qubic = qubic
