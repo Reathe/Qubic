@@ -37,17 +37,6 @@ class Composite(ABC, Entity):
 		"""
 		calls destroy oen every component
 		"""
-		print("destroying")
 		for c in self.components:
-			try:
-				print("\t{}".format(c))
-			except BaseException as be:
-				print("can't print")
-			try:
-				# if isinstance(c, Composite):
-				# 	c._destroy_components()
-				destroy(c)
-			except BaseException as be:
-				print("Exception:")
-				print(be)
+			destroy(c)
 		self.components.clear()
