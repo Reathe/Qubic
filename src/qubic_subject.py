@@ -7,12 +7,8 @@ from qubic_observer import QubicObserver
 class QubicSubject(ABC):
 	__observers: List[QubicObserver]
 
-	def __new__(cls):
-		if cls is QubicSubject:
-			raise TypeError('Abstract class cannot be instantiatied')
-		return object.__new__(cls)
-
-	def __init__(self):
+	def __init__(self, *args, **kwargs):
+		super().__init__()
 		self.__observers = []
 
 	@property

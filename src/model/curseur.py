@@ -14,6 +14,7 @@ class Curseur:
 			pos: (x, y, z)
 			pos_max: (x_max, y_max, z_max)
 		"""
+		super().__init__()
 		if not all(map(lambda v: v > 0, pos_max)):
 			raise ValueError("La pos_max {} du curseur n'est pas valide".format(pos_max))
 

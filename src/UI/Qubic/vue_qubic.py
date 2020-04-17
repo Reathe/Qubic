@@ -4,6 +4,7 @@ from ursina import *
 
 from qubic_observer import QubicObserver
 from ui.qubic.vue_pion import VuePion, VuePionFactory
+from composite import Composite
 
 
 class _Sol(Button):
@@ -25,18 +26,16 @@ class _Sol(Button):
 
 class _VueQubicSettings:
 	def __init__(self):
+		super().__init__()
 		self.center = None
 		self.vue_pion = 'Classic'
 
 
-class VueQubic(Entity, QubicObserver):
+class VueQubic(Composite, QubicObserver):
 	pions: List[List[List[Optional[VuePion]]]]
 
-	def __new__(cls, qubic, **kwargs):
-		return Entity.__new__(cls, **kwargs)
-
-	def __init__(self, qubic, **kwargs):
-		super().__init__(**kwargs)
+	def __init__(self, qubic, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 		taille = len(qubic)
 		self.qubic = qubic
 		qubic.add_observers(self)
@@ -44,7 +43,7 @@ class VueQubic(Entity, QubicObserver):
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		for z in range(taille):
 			for x in range(taille):
-				_Sol(self.qubic, position=(x, -1, z), parent=self)
+				self.components.append(_Sol(qubic, position=(x, -1, z), parent=scene))
 
 	# print("rota: {}".format(self.plateau))
 
@@ -55,5 +54,8 @@ class VueQubic(Entity, QubicObserver):
 					pion = qubic.plateau[x][y][z]
 					if pion and self.pions[x][y][z] is None:
 						self.pions[x][y][z] = VuePionFactory(qubic, self.settings.vue_pion).create_pion((x, y, z))
+						self.components.append(self.pions[x][y][z])
 					elif pion is None and self.pions[x][y][z]:
+						self.components.remove(self.pions[x][y][z])
 						destroy(self.pions[x][y][z])
+						self.pions[x][y][z] = None
