@@ -54,9 +54,8 @@ class VueQubic(Composite, QubicObserver):
 		qubic.add_observers(self)
 
 		self.settings = _VueQubicSettings()
-
-		self.qamera = self.settings.qamera_type()
-
+		target = (taille/2-.5, 0, taille/2-.5)
+		self.qamera = self.settings.qamera_type(target)
 		controls_type = Controls.get_controls(self.settings.control_method)
 		self.controls = controls_type(qubic, self.settings.vue_pion)
 		self.components.append(self.controls)
