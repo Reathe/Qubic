@@ -93,6 +93,19 @@ class Curseur:
 		pos = pos[0], pos[1], pos[2]
 		return all(max_val > val >= 0 for val, max_val in zip(pos, self.pos_max))
 
+	def valid_move(self, vect: Union[Tuple[int, int, int], 'Curseur']) -> bool:
+		"""
+		Checks if making this move will result in a valid position
+
+		Args:
+			vect: the move
+
+		Returns: new position is valid
+
+		"""
+		# noinspection PyTypeChecker
+		return self.valid_pos(add_dir(self, vect)) and not all(a == 0 for a in vect)
+
 	def move(self, vect: Tuple[int, int, int]) -> 'Curseur':
 		"""
 		Déplace le curseur, la nouvelle pos devient pos+vect, élément par élément

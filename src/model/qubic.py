@@ -1,5 +1,4 @@
 from typing import Tuple, List, Optional, Union
-
 import itertools
 
 from qubic_subject import QubicSubject
@@ -85,13 +84,14 @@ class Qubic(QubicSubject):
 
 	def get_pos_with_gravity(self, pos: Tuple[int, int, int]) -> Tuple[int, int, int]:
 		"""
-		Donne la position si le pion tombait jusqu'à ce qu'il rencontre sois le bas du plateau, soit un pion
+		Donne la position si le pion tombait d'en haut jusqu'à ce qu'il rencontre sois le bas du plateau, soit un pion
 
 		Args:
 			pos: la position de départ
 
 		Returns: la position tombee
 		"""
+		pos = pos[0], self.taille - 1, pos[2]
 		pion_sous = self.get_pion(add_dir(pos, BAS))
 		while pos[1] > 0 and pion_sous is None:
 			pos = add_dir(pos, BAS)

@@ -2,7 +2,9 @@ from typing import List, Optional
 
 from ursina import *
 
+from controls import Controls
 from qubic_observer import QubicObserver
+from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
 from composite import Composite
 
@@ -13,15 +15,23 @@ class _Sol(Button):
 		super().__init__(
 			model='cube',
 			texture='white_cube',
-			highlight_color=color.lime,
+			color=color.white,
 			**kwargs
 		)
+		self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
+		self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
 
-	def on_click(self):
+	def __controle_on_click(self):
 		pos = tuple(self.position + Vec3(0, len(self.qubic), 0))
 		pos = int(pos[0]), int(pos[1]), int(pos[2])
 		pos = self.qubic.get_pos_with_gravity(pos)
 		self.qubic.poser(pos)
+
+	def toggle_on_click(self):
+		temp = self.__next
+		on_click = None if temp[0] else self.__controle_on_click
+		self.__next = on_click, self.highlight_color, self.pressed_color, self.pressed_scale
+		self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = temp
 
 
 class _VueQubicSettings:
@@ -29,6 +39,8 @@ class _VueQubicSettings:
 		super().__init__()
 		self.center = None
 		self.vue_pion = 'Classic'
+		self.control_method = 'Keyboard'
+		self.qamera_type = QameraLocked
 
 
 class VueQubic(Composite, QubicObserver):
@@ -37,9 +49,18 @@ class VueQubic(Composite, QubicObserver):
 	def __init__(self, qubic, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		taille = len(qubic)
+
 		self.qubic = qubic
 		qubic.add_observers(self)
+
 		self.settings = _VueQubicSettings()
+
+		self.qamera = self.settings.qamera_type()
+
+		controls_type = Controls.get_controls(self.settings.control_method)
+		self.controls = controls_type(qubic, self.settings.vue_pion)
+		self.components.append(self.controls)
+
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		for z in range(taille):
 			for x in range(taille):
