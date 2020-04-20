@@ -1,8 +1,8 @@
 import unittest
 
-from src.model.pions.Pion import Pion
-from src.model.pions.PionBlanc import PionBlanc
-from src.model.pions.PionNoir import PionNoir
+from src.model.pion import Pion
+from src.model.pion import PionBlanc
+from src.model.pion import PionNoir
 
 
 class TestPions(unittest.TestCase):

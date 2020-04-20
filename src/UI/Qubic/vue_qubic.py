@@ -20,6 +20,7 @@ class _Sol(Button):
 		)
 		self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
 		self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
+		self.toggle_on_click()
 
 	def __controle_on_click(self):
 		pos = tuple(self.position + Vec3(0, len(self.qubic), 0))
@@ -52,9 +53,9 @@ class VueQubic(Composite, QubicObserver):
 
 		self.qubic = qubic
 		qubic.add_observers(self)
-
+		# TODO: controls depending on camera's position/angle
 		self.settings = _VueQubicSettings()
-		target = (taille/2-.5, 0, taille/2-.5)
+		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
 		controls_type = Controls.get_controls(self.settings.control_method)
 		self.controls = controls_type(qubic, self.settings.vue_pion)
