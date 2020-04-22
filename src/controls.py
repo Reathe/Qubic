@@ -48,6 +48,7 @@ class ControlsKeyboard(Controls):
 
 	def maj_vue(self):
 		self.vue_curseur.position = self.curseur.pos
+		self.vue_curseur.y *= 0.5
 
 
 class ControlsMouse(Controls):

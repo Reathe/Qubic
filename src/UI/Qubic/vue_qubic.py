@@ -15,9 +15,12 @@ class _Sol(Button):
 		super().__init__(
 			model='cube',
 			texture='white_cube',
+			origin=(0, 0.5),
 			color=color.white,
 			**kwargs
 		)
+		self.scale_y = 0.5
+		self.y = self.y * self.scale[1]
 		self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
 		self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
 		self.toggle_on_click()
@@ -64,7 +67,7 @@ class VueQubic(Composite, QubicObserver):
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		for z in range(taille):
 			for x in range(taille):
-				self.components.append(_Sol(qubic, position=(x, -1, z), parent=scene))
+				self.components.append(_Sol(qubic, position=(x, 0, z), parent=scene))
 
 	# print("rota: {}".format(self.plateau))
 
