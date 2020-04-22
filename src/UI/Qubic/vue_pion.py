@@ -1,6 +1,6 @@
 from ursina import *
 
-from model.pion import PionBlanc
+from model.pion import PionBlanc, PionNoir
 
 
 class VuePion(Entity):
@@ -25,17 +25,14 @@ class VuePionFactory:
 		self.qubic = qubic
 
 	def create_classic(self, position, **kwargs):
+		vp = VuePion(position, self.qubic,
+		             model='sphere',
+		             # texture='shore',
+		             **kwargs)
 		if self.qubic.get_pion(position) == PionBlanc:
-			return VuePion(position, self.qubic,
-			               model='sphere',
-			               # texture='shore',
-			               color=color.white,
-			               highlight_color=color.lime,
-			               **kwargs)
+			vp.color = color.white
+		elif self.qubic.get_pion(position) == PionNoir:
+			vp.color = color.black
 		else:
-			return VuePion(position, self.qubic,
-			               model='sphere',
-			               # texture='shore',
-			               color=color.black,
-			               highlight_color=color.lime,
-			               **kwargs)
+			vp.color = color.black50
+		return vp

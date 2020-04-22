@@ -12,7 +12,7 @@ class Controls(Composite, ABC):
 		self.qubic = qubic
 		taille = self.qubic.taille
 		self.curseur = Curseur((taille,) * 3)
-		self.vue_curseur = VuePionFactory(qubic, vue).create_pion((0, 0, 0), alpha=0.5)
+		self.vue_curseur = VuePionFactory(qubic, vue).create_pion((0, 0, 0))
 		self.components.append(self.vue_curseur)
 
 	@staticmethod
