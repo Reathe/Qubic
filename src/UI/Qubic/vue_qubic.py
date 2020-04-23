@@ -3,8 +3,7 @@ from typing import List, Optional
 from ursina import *
 
 from controls import Controls
-from qubic_observer import QubicObserver
-from qubic_subject import QubicSubject
+from qubic_observer import QubicObserver, QubicSubject
 from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
 from composite import Composite

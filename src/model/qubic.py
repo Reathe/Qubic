@@ -1,7 +1,7 @@
 from typing import Tuple, List, Optional, Union
 import itertools
 
-from qubic_subject import QubicSubject
+from qubic_observer import QubicSubject
 from model.curseur import Curseur
 from model.direction_tools import DROITE, HAUT, DEVANT, mult_dir, add_dir, BAS
 from model.pion import PionBlanc, PionNoir, Pion
