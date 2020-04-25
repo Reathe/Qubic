@@ -4,7 +4,7 @@ import itertools
 
 from qubic_subject import QubicSubject
 from model.curseur import Curseur
-from model.direction_tools import DROITE, HAUT, DEVANT, mult_dir, add_dir, BAS
+from model.direction_tools import mult_dir, add_dir, BAS
 from model.pion import PionBlanc, PionNoir, Pion
 
 
@@ -81,6 +81,7 @@ class Qubic(QubicSubject):
 			move = pos
 			self._posable.remove(move)
 			self._pose.append(move)
+			self.win(pos)
 			self.notify_observers()
 
 	def get_pos_with_gravity(self, pos: Tuple[int, int, int]) -> Tuple[int, int, int]:
@@ -131,43 +132,43 @@ class Qubic(QubicSubject):
 
 	def win(self, pos: Union[Tuple[int, int, int], Curseur]) -> bool:
 		"""
-		Retourne si la partie a été gagnée
+		Returns if game was won by the piece in this position,
+		also updates the corresponding fini variable
+
 		Args:
-			pos:
+			pos: the checked position
 
-		Returns:
-
+		Returns: boolean
 		"""
-		# TODO : Normalement ok, mais à test
 		pos = pos[0], pos[1], pos[2]
-		lst = list(itertools.product([True, False], repeat=3))
+		if self.get_pion(pos) is None:
+			return False
+
+		lst = list(itertools.product([1, 0, -1], repeat=3))[:28//2]
 		axe: Tuple[int, int, int]
 		for axe in lst:
-			if self.__sum(pos, axe) == self.taille:
+			if self.__sum(pos, axe) + self.__sum(pos, mult_dir(-1, axe)) - 1 == self.taille:
 				self._fini = True
 				return self.fini
 
 		return False
 
 	def __sum(self, pos: Tuple[int, int, int], axes: Tuple[int, int, int]) -> int:
-		# TODO: à test, pas sûr de moi du tout
-		pion = self.get_pion(pos)
-		deb = 0  # len(self)-1
-		test_pos = pos
+		"""
+		Args:
+			pos: Starting pos
+			axes: the movement vector
+
+		Returns:
+			the number of consecutive equal pieces starting from pos, and moving by axes each time
+		"""
+		if axes == (0, 0, 0):
+			return 1
 		somme = 0
-		deplacement = [DROITE if axes[0] else (0, 0, 0),
-		               HAUT if axes[1] else (0, 0, 0),
-		               DEVANT if axes[2] else (0, 0, 0)]
-		if deb != 0:
-			deplacement = list(map(mult_dir, [-1] * len(deplacement), deplacement))
-		deplacement = add_dir(*deplacement)
-		x, y, z = tuple(map(lambda p, axe: deb if axe else p, pos, axes))
-		curr_pos = x, y, z
-		if deplacement == (0, 0, 0):
-			return 0
-		while self.valid_pos(curr_pos) and self.get_pion(curr_pos):
+		pion = self.get_pion(pos)
+		while self.valid_pos(pos) and self.get_pion(pos) == pion:
 			somme += 1
-			add_dir(curr_pos, deplacement)
+			pos = add_dir(pos, axes)
 		return somme
 
 	def reset(self):
