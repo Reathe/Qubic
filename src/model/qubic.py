@@ -63,7 +63,7 @@ class Qubic(QubicSubject):
 		"""
 		return self._plateau[pos[0]][pos[1]][pos[2]]
 
-	def poser(self, pos: Union[Tuple[int, int, int], Curseur]):
+	def poser(self, pos: Union[Tuple[int, int, int], Curseur], pion: Pion = None):
 		"""
 		Pose un pion à la position pos dans le plateau si il n'y a rien
 		Le type de pion posé est celui dont c'est le tour
@@ -71,18 +71,24 @@ class Qubic(QubicSubject):
 
 		Args:
 			pos: La position
+			pion: Le pion à poser
 		"""
 		pos = pos[0], pos[1], pos[2]
 		if self._gravite:
 			pos = self.get_pos_with_gravity(pos)
 		if self.get_pion(pos) is None:
-			pion_tour_blanc = {True: PionBlanc(), False: PionNoir()}
-			self._plateau[pos[0]][pos[1]][pos[2]] = pion_tour_blanc.get(self.tour_blanc())
+			if pion is None:
+				pion_tour_blanc = {True: PionBlanc(), False: PionNoir()}
+				pion = pion_tour_blanc.get(self.tour_blanc())
+			self._plateau[pos[0]][pos[1]][pos[2]] = pion
 			move = pos
 			self._posable.remove(move)
 			self._pose.append(move)
 			self.win(pos)
 			self.notify_observers()
+			# TODO: temp
+			if self.fini:
+				print("win {}".format(self.get_pion(pos)))
 
 	def get_pos_with_gravity(self, pos: Tuple[int, int, int]) -> Tuple[int, int, int]:
 		"""
@@ -119,6 +125,7 @@ class Qubic(QubicSubject):
 			last = self._pose.pop()
 			self._posable.append(last)
 			self.plateau[last[0]][last[1]][last[2]] = None
+			self._fini = self.win(self.pose[len(self.pose) - 1])
 			self.notify_observers()
 
 	@staticmethod
@@ -179,6 +186,7 @@ class Qubic(QubicSubject):
 		self._posable = Qubic.__start_posable(len(self))
 		self._pose = []
 		self._fini = False
+		self.notify_observers()
 
 	@property
 	def pose(self):

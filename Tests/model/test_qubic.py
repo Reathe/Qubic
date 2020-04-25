@@ -13,7 +13,19 @@ class TestQubic(unittest.TestCase):
 		pass
 
 	def test_annule_pose(self):
-		pass
+		q = Qubic(gravite=False)
+
+		for x, z in zip(range(len(q)), range(len(q))[:0:-1]):
+			q.poser((x, 0, z))
+			q.poser((x, 1, z))
+
+		self.assertFalse(q.fini)
+
+		q.poser((len(q) - 1, 0, 0))
+		self.assertTrue(q.fini)
+		q.annule_coup()
+		self.assertTrue(q.get_pion((len(q) - 1, 0, 0)) is None)
+		self.assertFalse(q.fini)
 
 	def test_valid_pos(self):
 		q = Qubic()
