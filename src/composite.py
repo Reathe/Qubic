@@ -8,9 +8,8 @@ class Composite(ABC, Entity):
 	__components: List[Entity]
 
 	def __init__(self, *args, **kwargs):
-		super().__init__(parent=scene, *args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.__components = []
-		self.on_destroy = self._destroy_components
 
 	@property
 	def components(self) -> List[Entity]:
@@ -33,10 +32,16 @@ class Composite(ABC, Entity):
 			for c in self.components:
 				setattr(c, key, value)
 
+	def on_destroy(self):
+		self._destroy_components()
+
 	def _destroy_components(self):
 		"""
 		calls destroy oen every component
 		"""
 		for c in self.components:
-			destroy(c)
+			try:
+				destroy(c)
+			except Exception as ex:
+				print(f'exception {ex} while destroying {c}')
 		self.components.clear()

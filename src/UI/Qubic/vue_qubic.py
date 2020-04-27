@@ -2,54 +2,29 @@ from typing import List, Optional
 
 from ursina import *
 
-from controls import Controls
-from qubic_observer import QubicObserver, QubicSubject
+from controls import Controls, Map
+from qubic_observer import QubicObserver
 from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
 from composite import Composite
 
 
 class _Floor(Composite):
-	class __Floor1(QubicSubject, Button):
-		def __init__(self, qubic, **kwargs):
-			self.qubic = qubic
-			super().__init__(
-				model='cube',
-				texture='white_cube',
-				origin=(0, 0.5),
-				color=color.white,
-				**kwargs
-			)
-			self.scale_y = 0.5
-			self.y = self.y * self.scale[1]
-			self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
-			self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
-
-		def __controle_on_click(self):
-			pos = tuple(self.position + Vec3(0, len(self.qubic), 0))
-			pos = int(pos[0]), int(pos[1]), int(pos[2])
-			pos = self.qubic.get_pos_with_gravity(pos)
-			self.qubic.poser(pos)
-			self.notify_observers()
-
-		def toggle_on_click(self):
-			temp = self.__next
-			on_click = None if temp[0] else self.__controle_on_click
-			self.__next = on_click, self.highlight_color, self.pressed_color, self.pressed_scale
-			self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = temp
-
-		def on_mouse_enter(self):
-			super().on_mouse_enter()
-			self.notify_observers()
-
-		def notify_observers(self):
-			self.observers[0].notify(self.position)
-
 	def __init__(self, qubic, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for z in range(len(qubic)):
 			for x in range(len(qubic)):
-				self.components.append(self.__Floor1(qubic, position=(x, 0, z), parent=self))
+				m = Map.MapPart(qubic,
+				                (x, 0, z),
+				                model='cube',
+				                origin=(0, 0.5),
+				                position=(x, 0, z),
+				                texture='white_cube',
+				                color=color.white,
+				                parent=self)
+				m.scale_y = 0.5
+				m.y = m.y * m.scale[1]
+				self.components.append(m)
 
 	def toggle_on_click(self):
 		for sol in self.components:
