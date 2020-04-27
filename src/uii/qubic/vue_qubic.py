@@ -4,8 +4,8 @@ from ursina import *
 
 from controls import Controls, Map
 from qubic_observer import QubicObserver
-from ui.qamera.qamera_locked import QameraLocked
-from ui.qubic.vue_pion import VuePion, VuePionFactory
+from uii.qamera.qamera_locked import QameraLocked
+from uii.qubic.vue_pion import VuePion, VuePionFactory
 from composite import Composite
 
 

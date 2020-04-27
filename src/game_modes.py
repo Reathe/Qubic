@@ -1,7 +1,7 @@
 from abc import ABC
 
 from model.qubic import Qubic
-from ui.qubic.vue_qubic import VueQubic
+from uii.qubic.vue_qubic import VueQubic
 
 
 class QubicMode(ABC):

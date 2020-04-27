@@ -5,7 +5,7 @@ from math import cos, sin, pi
 from ursina import *
 
 from model.direction_tools import mult_dir, add_dir
-from ui.qamera.qamera import Qamera
+from uii.qamera.qamera import Qamera
 
 
 class QameraLocked(Qamera):
