@@ -1,4 +1,5 @@
 import string
+from math import pi, cos, sin, atan2
 
 from ursina import *
 
@@ -36,12 +37,16 @@ class Controls(QubicObserver, Composite):
 		self.vue_curseur.y *= self.vue_curseur.scale_y
 
 	def notify(self, position):
-		pass
+		self.curseur.pos = int(position[0]), self.qubic.taille - 1, int(position[2])
+		self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
+		self.maj_vue()
 
 
 class ControlsKeyboard(Controls):
 	def __init__(self, qubic, vue, *args, **kwargs):
 		super().__init__(qubic, vue, *args, **kwargs)
+		vue.qamera.add_observers(self)
+		self.angle = 0
 
 	def input(self, key):
 		vect = (0, 0, 0)
@@ -53,6 +58,27 @@ class ControlsKeyboard(Controls):
 			vect = GAUCHE
 		elif key == 'right arrow':
 			vect = DROITE
+
+		def rotate(vect, angle):
+			"""
+			rotates the vector by the angle relative to the x and z axis, for exemple if vect=(1,0,0)
+			and angle = pi/2, then vect will rotate by 45 degrees making a (0,0,-1) vector
+			Args:
+				vect:
+				angle:
+
+			Returns:
+
+			"""
+			if vect == (0, 0, 0):
+				return vect
+			x, y, z = vect
+			theta = atan2(z, x) - angle
+			x, z = round(cos(theta)), round(sin(theta))
+			return x, y, z
+
+		vect = rotate(vect, self.angle)
+
 		if self.curseur.valid_move(vect):
 			self.curseur += vect
 			self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
@@ -62,21 +88,24 @@ class ControlsKeyboard(Controls):
 			self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
 			self.maj_vue()
 
+	def notify(self, angle):
+		try:
+			super().notify(angle)
+		except:
+			if self.angle != (angle % 360) / 180 * pi:
+				self.angle = (angle % 360) / 180 * pi
+
 
 class ControlsMouse(Controls):
 	def __init__(self, qubic, vue, *args, **kwargs):
 		super().__init__(qubic, vue, *args, **kwargs)
+		vue.board.add_observers(self)
 		for c in vue.components:
 			if hasattr(c, 'toggle_on_click'):
 				try:
 					c.toggle_on_click()
 				except Exception as ex:
 					print(f"error on toggling buttons: {ex}")
-
-	def notify(self, position):
-		self.curseur.pos = int(position[0]), self.qubic.taille - 1, int(position[2])
-		self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
-		self.maj_vue()
 
 
 class Map(Composite):
@@ -112,12 +141,13 @@ class Map(Composite):
 			self.notify_observers()
 
 		def notify_observers(self):
-			self.observers[0].notify(self.real_pos)
+			for ob in self.observers:
+				ob.notify(self.real_pos)
 
 	def __init__(self, qubic, origin=(0.5, 0), *args, **kwargs):
 		super().__init__(*args, **kwargs, parent=camera.ui)
-		for z in list(range(len(qubic)))[::-1]:
-			for x in range(len(qubic)):
+		for z in list(range(len(qubic))):
+			for x in list(range(len(qubic)))[::-1]:
 				m = self.MapPart(qubic, (x, 0, z),
 				                 model='quad',
 				                 scale=0.05,

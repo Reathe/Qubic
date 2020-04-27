@@ -82,6 +82,11 @@ class QameraLocked(Qamera):
 		self.position = self.pos_xyz
 		self.rotation_x = (pi / 2 - self.beta) * 180 / pi
 		self.rotation_y = -(pi / 2 + self.alpha) * 180 / pi
+		self.notify_observers()
+
+	def notify_observers(self):
+		for ob in self.observers:
+			ob.notify(self.rotation_y)
 
 	def update(self):
 		if mouse.left:
@@ -120,6 +125,7 @@ class QameraLocked(Qamera):
 		self.update_pos()
 
 
+# TODO: Settings abstract class
 class QameraLockedSettings:
 	def __init__(self):
 		super().__init__()

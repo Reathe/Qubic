@@ -57,12 +57,11 @@ class VueQubic(Composite, QubicObserver):
 		self.settings = _VueQubicSettings()
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
-		sol = _Floor(qubic)
-		self.components.append(sol)
+		self.board = _Floor(qubic)
+		self.components.append(self.board)
 		controls_type = Controls.get_controls(self.settings.control_method)
 		self.controls = controls_type(qubic, self)
 		self.components.append(self.controls)
-		sol.add_observers(self.controls)
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 
 	# print("rota: {}".format(self.plateau))

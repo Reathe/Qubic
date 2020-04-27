@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from ursina import *
 
+from qubic_observer import QubicSubject
 
-class Qamera(ABC, Entity):
+
+class Qamera(QubicSubject, Entity):
 	def __init__(self, *args, **kwargs):
 		super().__init__(name='qamera', *args, **kwargs)
 
