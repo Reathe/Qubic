@@ -13,5 +13,3 @@ class QubicMode(ABC):
 class OneVOne(QubicMode):
 	def __init__(self):
 		super().__init__()
-
-# TODO: change controls ...

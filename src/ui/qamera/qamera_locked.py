@@ -1,25 +1,26 @@
 from typing import Tuple
 import json
-
 from math import cos, sin, pi
+
 from ursina import *
 
-from model.direction_tools import mult_dir
+from model.direction_tools import mult_dir, add_dir
 from ui.qamera.qamera import Qamera
 
 
 class QameraLocked(Qamera):
 	"""
-	Une caméra qui tourne autour d'un cible. La cible est (0,0,0) par défaut.
+	Une caméra qui tourne autour d'un cible.
 	"""
 
-	def __init__(self, *args, **kwargs):
+	def __init__(self, target=(0, 0, 0), *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		camera.parent = self
 		camera.position = (0, 0, 0)
 		self.alpha = None
 		self.beta = None
 		self.rayon = None
+		self.target = target
 		self.__settings = QameraLockedSettings()
 		try:
 			self.load_settings()
@@ -71,7 +72,7 @@ class QameraLocked(Qamera):
 		# beta est le seul paramètre de l'axe y
 		y = cos(self.beta) * self.rayon
 
-		return x, y, z
+		return add_dir((x, y, z), self.target)
 
 	def update_pos(self):
 		"""
@@ -81,6 +82,11 @@ class QameraLocked(Qamera):
 		self.position = self.pos_xyz
 		self.rotation_x = (pi / 2 - self.beta) * 180 / pi
 		self.rotation_y = -(pi / 2 + self.alpha) * 180 / pi
+		self.notify_observers()
+
+	def notify_observers(self):
+		for ob in self.observers:
+			ob.notify(self.rotation_y)
 
 	def update(self):
 		if mouse.left:
@@ -119,6 +125,7 @@ class QameraLocked(Qamera):
 		self.update_pos()
 
 
+# TODO: Settings abstract class
 class QameraLockedSettings:
 	def __init__(self):
 		super().__init__()
