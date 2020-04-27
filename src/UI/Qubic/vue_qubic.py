@@ -4,6 +4,7 @@ from ursina import *
 
 from controls import Controls, Map
 from qubic_observer import QubicObserver
+from ui.lighting import Lights
 from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
 from composite import Composite
@@ -57,6 +58,7 @@ class VueQubic(Composite, QubicObserver):
 		self.settings = _VueQubicSettings()
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
+		self.components.append(self.qamera)
 		sol = _Floor(qubic)
 		self.components.append(sol)
 		controls_type = Controls.get_controls(self.settings.control_method)
@@ -64,8 +66,7 @@ class VueQubic(Composite, QubicObserver):
 		self.components.append(self.controls)
 		sol.add_observers(self.controls)
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
-
-	# print("rota: {}".format(self.plateau))
+		self.components.append(Lights())
 
 	def notify(self, qubic):
 		for x in range(len(qubic)):

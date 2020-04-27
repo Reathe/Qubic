@@ -26,16 +26,16 @@ class VuePionFactory:
 
 	def create_classic(self, position, **kwargs):
 		vp = VuePion(position, self.qubic,
-		             model='sphere',
+		             model='classic',
 		             origin=(0, -0.5),
-		             # texture='shore',
+		             # texture='classic',
 		             **kwargs)
 		vp.scale = 0.5
 		vp.y = vp.y * vp.scale[1]
 		if self.qubic.get_pion(position) == PionBlanc:
 			vp.color = color.white
 		elif self.qubic.get_pion(position) == PionNoir:
-			vp.color = color.black
+			vp.color = color.dark_gray
 		else:
 			vp.color = color.black50
 		return vp
