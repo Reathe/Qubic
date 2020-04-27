@@ -17,7 +17,9 @@ class Controls(QubicObserver, Composite):
 		self.curseur = Curseur((taille,) * 3)
 		self.vue_curseur = VuePionFactory(qubic, vue.settings.vue_pion).create_pion((0, 0, 0))
 		self.components.append(self.vue_curseur)
-		_map = Map(qubic, position=(0.5, 0.3, 0))
+		x, y = vue.settings.control_map_position
+		x, y = ((x - 50) / 100) * window.aspect_ratio, (y - 50) / 100
+		_map = Map(qubic, position=(x, y))
 		_map.toggle_on_click()
 		_map.add_observers(self)
 		self.components.append(_map)
@@ -112,7 +114,7 @@ class Map(Composite):
 		def notify_observers(self):
 			self.observers[0].notify(self.real_pos)
 
-	def __init__(self, qubic, *args, **kwargs):
+	def __init__(self, qubic, origin=(0.5, 0), *args, **kwargs):
 		super().__init__(*args, **kwargs, parent=camera.ui)
 		for z in list(range(len(qubic)))[::-1]:
 			for x in range(len(qubic)):
@@ -125,7 +127,7 @@ class Map(Composite):
 				# m.text = m.tooltip.text
 				# m.text_entity.color = color.black
 				self.components.append(m)
-		grid_layout(self.components, len(qubic), len(qubic))
+		grid_layout(self.components, len(qubic), len(qubic), origin=origin)
 
 	def toggle_on_click(self):
 		for sol in self.components:

@@ -41,6 +41,7 @@ class _VueQubicSettings:
 		self.center = None
 		self.vue_pion = 'Classic'
 		self.control_method = 'Mouse'
+		self.control_map_position = (99, 50)  # x and y percentage
 		self.qamera_type = QameraLocked
 
 
