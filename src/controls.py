@@ -7,7 +7,7 @@ from composite import Composite
 from model.curseur import Curseur
 from model.direction_tools import DERRIERE, DEVANT, GAUCHE, DROITE
 from qubic_observer import QubicObserver, QubicSubject
-from uii.qubic.vue_pion import VuePionFactory
+from ui.qubic.vue_pion import VuePionFactory
 
 
 class Controls(QubicObserver, Composite):

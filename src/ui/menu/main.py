@@ -4,7 +4,7 @@ from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 from game_modes import OneVOne
 from model.qubic import Qubic
 from composite import Composite
-from uii.qubic.vue_qubic import VueQubic
+from ui.qubic.vue_qubic import VueQubic
 
 
 class BoutonJeu(DropdownMenuButton):
