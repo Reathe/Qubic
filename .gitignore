@@ -1,4 +1,8 @@
+# Qubic
 *Settings.json
+# 3D Models
+*.obj
+*.blend1
 # IDE / Editeur
 .idea
 .vscode
