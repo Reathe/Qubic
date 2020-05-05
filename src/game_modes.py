@@ -13,3 +13,8 @@ class QubicMode(ABC):
 class OneVOne(QubicMode):
 	def __init__(self):
 		super().__init__()
+
+
+class Online(QubicMode):
+	def __init__(self):
+		super().__init__()

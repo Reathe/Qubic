@@ -39,4 +39,6 @@ class MainMenu(Composite):
 		return BoutonJeu(text="1 vs 1"
 		                 , on_click=lambda: (destroy(self), OneVOne())
 		                 , **kwargs)
-# OneVOne(),
+
+	def __button_online_game(self, **kwargs):
+		return BoutonJeu(text="Online game")

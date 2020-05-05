@@ -64,10 +64,10 @@ class ControlsKeyboard(Controls):
 			rotates the vector by the angle relative to the x and z axis, for exemple if vect=(1,0,0)
 			and angle = pi/2, then vect will rotate by 45 degrees making a (0,0,-1) vector
 			Args:
-				vect:
-				angle:
+				vect: the initial direction vector
+				angle: the angle of rotation
 
-			Returns:
+			Returns: the new angle
 
 			"""
 			if vect == (0, 0, 0):
@@ -116,13 +116,25 @@ class Map(Composite):
 				**kwargs
 			)
 			self.qubic = qubic
-			self.real_pos = real_pos
-			# tooltip
-			p = string.ascii_uppercase[real_pos[0]], real_pos[2] + 1
-			self.tooltip = Tooltip("{}{}".format(*p))
+			self._real_pos = real_pos
 			# toggle on click
 			self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
 			self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
+
+		@property
+		def real_pos(self):
+			return self._real_pos
+
+		@real_pos.setter
+		def real_pos(self, value):
+			self._real_pos = value
+			# tooltip
+			if len(self.qubic) <= 26:
+				p = string.ascii_uppercase[self.real_pos[0]], self.real_pos[2] + 1
+				self.tooltip = Tooltip("{}{}".format(*p))
+			else:
+				p = self.real_pos[0] + 1, self.real_pos[2] + 1
+				self.tooltip = Tooltip("{},{}".format(*p))
 
 		def __controle_on_click(self):
 			pos = self.qubic.get_pos_with_gravity(self.real_pos)
@@ -150,7 +162,7 @@ class Map(Composite):
 			for x in list(range(len(qubic)))[::-1]:
 				m = self.MapPart(qubic, (x, 0, z),
 				                 model='quad',
-				                 scale=0.05,
+				                 scale=.2 / len(qubic),
 				                 texture='white_cube',
 				                 color=color.white,
 				                 parent=self)

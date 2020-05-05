@@ -54,7 +54,6 @@ class VueQubic(Composite, QubicObserver):
 		taille = len(qubic)
 		self.qubic = qubic
 		qubic.add_observers(self)
-		# TODO: controls depending on camera's position/angle
 		self.settings = _VueQubicSettings()
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
