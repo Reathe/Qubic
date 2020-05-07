@@ -69,9 +69,10 @@ class Room:
 		"""
         Check if player is in room
         """
-		# TODO: check optimisation over classic for loop
-		iterable = (player.id == player_id for player in self.players)
-		return any(iterable)
+		for player in self.players:
+			if player.id == player_id:
+				return True
+		return False
 
 	def is_player_turn(self, player_id):
 		"""

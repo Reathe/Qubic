@@ -9,7 +9,7 @@ from networking.rooms import Rooms
 
 
 # TODO: integrer une ui activable en console
-# TODO : peut-être passer en multi-threaded, je sais pas si c'est utile pour l'instant
+# TODO : peut-être passer en multi-threaded, 1 thread/client je sais pas si c'est utile pour l'instant
 class QubicServer(TCPServer, ThreadingMixIn):
 	rooms: Rooms
 
@@ -33,10 +33,6 @@ class ServerRequestHandler(BaseRequestHandler):
 			data = self.request.recv(1024).decode().strip()
 			request = jsonpickle.decode(data)
 			result = self.qubic_handler.handle_request(request)
-			# TODO: enlever print
-			# print(request)
-			# print(result)
-
 			data = jsonpickle.encode(result)
 			encoded = data.encode()
 			self.request.sendall(encoded)
