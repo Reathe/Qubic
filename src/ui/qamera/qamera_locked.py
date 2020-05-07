@@ -1,10 +1,10 @@
 from typing import Tuple
-import json
 from math import cos, sin, pi
 
 from ursina import *
 
 from model.direction_tools import mult_dir, add_dir
+from qubic_settings import Settings
 from ui.qamera.qamera import Qamera
 
 
@@ -125,10 +125,9 @@ class QameraLocked(Qamera):
 		self.update_pos()
 
 
-# TODO: Settings abstract class
-class QameraLockedSettings:
+class QameraLockedSettings(Settings):
 	def __init__(self):
-		super().__init__()
+		super().__init__('QameraLockedSettings')
 		self.start_alpha = None
 		self.start_beta = None
 		self.start_r = None
@@ -141,24 +140,6 @@ class QameraLockedSettings:
 		self.start_r = 20
 		self.sensibilite = 1
 		self.zoom_sensibilite = 5
-
-	def save(self):
-		print("Saving camera locked settings...")
-		try:
-			with open('QameraLockedSettings.json', 'w') as file:
-				json.dump(self.__dict__, file)
-		except:
-			print("Failed to save")
-			raise IOError
-
-	def load(self):
-		print("Loading camera locked settings...")
-		try:
-			with open('QameraLockedSettings.json', 'r') as file:
-				self.__dict__ = json.load(file)
-		except:
-			print("Failed")
-			raise IOError
 
 
 # noinspection PyTypeChecker
