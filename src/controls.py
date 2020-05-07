@@ -116,7 +116,7 @@ class Map(Composite):
 				**kwargs
 			)
 			self.qubic = qubic
-			self._real_pos = real_pos
+			self.real_pos = real_pos
 			# toggle on click
 			self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
 			self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
