@@ -10,6 +10,9 @@ class Player:
 		self.id = id
 		self.name = name
 
+	def __repr__(self):
+		return f'Player[{self.name}, {self.id}]'
+
 
 class Room:
 	players: List[Player]
@@ -21,7 +24,7 @@ class Room:
 		self.spectators = {}
 		self.qubic = Qubic(taille, gravite)
 
-		if room_name is not None:
+		if room_name:
 			self.name = room_name
 		else:
 			self.name = self.id
@@ -70,24 +73,50 @@ class Room:
 		iterable = (player.id == player_id for player in self.players)
 		return any(iterable)
 
+	def is_player_turn(self, player_id):
+		"""
+		Args:
+			player_id: the player
+
+		Returns:
+			if its player_id's turn
+		"""
+		if len(self.players) != 2:
+			return False
+
+		if self.qubic.tour_blanc():
+			return player_id == self.players[0].id
+		elif self.qubic.tour_noir():
+			return player_id == self.players[1].id
+		else:
+			return False
+
+	def __str__(self):
+		private = "private," if self.private else "public,"
+		return (f" Room[name: '{self.name}',"
+		        f" id: {self.id},"
+		        f" {private}"
+		        f" Players: {self.players},"
+		        f" Specs: {list(self.spectators.values())}]")
+
 
 class Rooms:
-	__rooms = Dict[str, Room]
+	_rooms = Dict[str, Room]
 	players = Dict[str, Player]
 
 	def __init__(self):
-		self.__rooms = {}
+		self._rooms = {}
 		self.players = {}
 
 	@property
 	def rooms_id(self):
 		"""a list of all public room ids"""
-		return [rid for rid in self.__rooms if not self.rooms[rid].private]
+		return [rid for rid in self._rooms if not self.rooms[rid].private]
 
 	@property
 	def rooms(self):
 		"""a list of all public rooms"""
-		return [room for room in self.__rooms.values() if not room.private]
+		return [room for room in self._rooms.values() if not room.private]
 
 	def __getitem__(self, room_id):
 		"""
@@ -97,7 +126,7 @@ class Rooms:
 		Returns:
 			the room
 		"""
-		return self.__rooms[room_id]
+		return self._rooms[room_id]
 
 	def register(self, player_name: string) -> Player:
 		"""
@@ -123,7 +152,7 @@ class Rooms:
 		Returns: the room id
 		"""
 		identifier = str(uuid4())
-		self.__rooms[identifier] = Room(identifier, room_name, private=private)
+		self._rooms[identifier] = Room(identifier, room_name, private=private)
 		return identifier
 
 	def join(self, player_id, room_id=None, spectator=False) -> str:
@@ -144,12 +173,12 @@ class Rooms:
 		player = self.players[player_id]
 
 		if room_id is None:
-			for id, room in self.__rooms:
+			for id, room in self._rooms:
 				if not room.private:
 					room_id = id
 
-		if room_id in self.__rooms:
-			self.__rooms[room_id].join(player, spectator)
+		if room_id in self._rooms:
+			self._rooms[room_id].join(player, spectator)
 			return room_id
 		else:
 			raise RoomNotFound()
@@ -168,10 +197,10 @@ class Rooms:
 
 		player = self.players[player_identifier]
 
-		if room_id in self.__rooms:
-			self.__rooms[room_id].leave(player)
-			if self.__rooms[room_id].is_empty():
-				del self.__rooms[room_id]
+		if room_id in self._rooms:
+			self._rooms[room_id].leave(player)
+			if self._rooms[room_id].is_empty():
+				del self._rooms[room_id]
 		else:
 			raise RoomNotFound()
 
@@ -179,9 +208,9 @@ class Rooms:
 		"""
         Delete empty __rooms
         """
-		for room_id in self.__rooms:
-			if self.__rooms[room_id].is_empty():
-				del self.__rooms[room_id]
+		for room_id in self._rooms:
+			if self._rooms[room_id].is_empty():
+				del self._rooms[room_id]
 
 
 class AlreadyJoined(Exception):

@@ -1,42 +1,47 @@
-import json
 import socket
 from typing import Dict, Any, List
 
+import jsonpickle
+
+from model.qubic import Qubic
 from networking.rooms import Room
 
 
 class Client:
 	HOST, PORT = "localhost", 9999
 
-	def __init__(self, name, *args, **kwargs):
+	def __init__(self, name, id=None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.name = None
-		self.id = None
 		self.room_id = None
+		self.id = id
+		if self.id is None:
+			self._register(name)
 
-		self._register(name)
-
-	def send(self, data: Dict[str, Any]) -> Dict[str, Any]:
+	def send(self, data: Dict[str, Any], size=4096) -> Dict[str, Any]:
 		"""
 		Sends data to server
 
 		Args:
 			data: the data to be sent
-
+			size: max size of the received data in bytes
+			pickle: pickled object
 		Returns:
 			the received data
 		"""
-		data = json.dumps(data)
+		data = jsonpickle.encode(data)
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 			# Create a socket (SOCK_STREAM means a TCP socket)
 			# Connect to server and send request
 			sock.connect((self.HOST, self.PORT))
 			sock.sendall(bytes(data + "\n", "utf-8"))
 			# Receive request from the server and shut down
-			received = json.loads(sock.recv(1024).decode())
-			print("Sent:     {}".format(data))
-			print("Received: {}".format(received))
-			return received
+			received = sock.recv(size).decode()
+
+			answer = jsonpickle.decode(received)
+			# print("Sent:     {}".format(data))
+			# print("Received: {}".format(received))
+			return answer
 
 	def _register(self, player_name: str):
 		"""
@@ -96,7 +101,7 @@ class Client:
 		}
 		result = self.send(request)
 		try:
-			return result['room_id']
+			self.room_id = result['room_id']
 		except Exception as ex:
 			print(ex)
 			print(result)
@@ -141,15 +146,48 @@ class Client:
 			print(ex)
 			print(result)
 
-	def get_room(self, room_id: str) -> Room:
+	def get_room(self) -> Room:
 		request = {
 			'type': 'room_get_by_id',
 			'player_id': self.id,
-			'room_id': room_id,
+			'room_id': self.room_id
 		}
 		result = self.send(request)
 		try:
 			return result['room']
+		except Exception as ex:
+			print(ex)
+			print(result)
+
+	def get_qubic(self) -> Qubic:
+		"""
+		Has to be called when in a room
+
+		Returns:
+			the Qubic
+		"""
+		request = {
+			'type': 'get_qubic',
+			'player_id': self.id,
+			'room_id': self.room_id
+		}
+		result = self.send(request)
+		try:
+			return result['qubic']
+		except Exception as ex:
+			print(ex)
+			print(result)
+
+	def qubic_place(self, pos):
+		request = {
+			'type': 'qubic_place',
+			'player_id': self.id,
+			'room_id': self.room_id,
+			'pos': pos
+		}
+		result = self.send(request)
+		try:
+			return result['qubic']
 		except Exception as ex:
 			print(ex)
 			print(result)

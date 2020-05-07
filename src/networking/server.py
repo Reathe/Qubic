@@ -1,20 +1,22 @@
-import json
 from abc import ABC, abstractmethod
-from socketserver import TCPServer, BaseRequestHandler  # , ThreadingMixIn
-# from threading import Thread
+from socketserver import TCPServer, BaseRequestHandler, ThreadingMixIn
+from threading import Thread, Lock
 from typing import Any, Tuple, Optional, Dict
+
+import jsonpickle
 
 from networking.rooms import Rooms
 
 
 # TODO: integrer une ui activable en console
 # TODO : peut-être passer en multi-threaded, je sais pas si c'est utile pour l'instant
-class QubicServer(TCPServer):
+class QubicServer(TCPServer, ThreadingMixIn):
 	rooms: Rooms
 
 	def __init__(self, server_address: Tuple[str, int], ServerRequestHandlerClass):
 		super().__init__(server_address, ServerRequestHandlerClass)
 		self.rooms = Rooms()
+		self.lock = Lock()
 
 
 class ServerRequestHandler(BaseRequestHandler):
@@ -27,14 +29,19 @@ class ServerRequestHandler(BaseRequestHandler):
 	def handle(self):
 		# self.request is the TCP socket connected to the client
 		# host, port = self.client_address
-		data = self.request.recv(1024).decode().strip()
-		request = json.loads(data)
-		result = self.qubic_handler.handle_request(request)
-		# TODO: enlever print
-		print(request)
-		print(result)
-		data = json.dumps(result)
-		self.request.sendall(data.encode())
+		try:
+			data = self.request.recv(1024).decode().strip()
+			request = jsonpickle.decode(data)
+			result = self.qubic_handler.handle_request(request)
+			# TODO: enlever print
+			# print(request)
+			# print(result)
+
+			data = jsonpickle.encode(result)
+			encoded = data.encode()
+			self.request.sendall(encoded)
+		except Exception as e:
+			print(e)
 
 
 class QubicRequestHandler(ABC):
@@ -60,6 +67,8 @@ class QubicRequestHandler(ABC):
 		handler = RoomIDListHandler(server, next=handler)
 		handler = RoomListHandler(server, next=handler)
 		handler = GetRoomByIDHandler(server, next=handler)
+		handler = QubicPlaceHandler(server, next=handler)
+		handler = GetQubicHandler(server, next=handler)
 		return handler
 
 	def handle_request(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -71,7 +80,16 @@ class QubicRequestHandler(ABC):
 		Returns:
 			the result of the request, None if the request cannot be handled
 		"""
-		result = self.next._handle_request(data)
+
+		try:
+			self.server.lock.acquire()
+			result = self._handle_request(data)
+		except Exception as e:
+			print(e)
+			result = None
+		finally:
+			self.server.lock.release()
+
 		if result:
 			return result
 		elif self.next:
@@ -167,8 +185,85 @@ class GetRoomByIDHandler(QubicRequestHandler):
 			}
 
 
+class GetQubicHandler(QubicRequestHandler):
+	def _handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+		if request['type'] == 'get_qubic':
+			pid, rid = request['player_id'], request['room_id']
+			room = self.server.rooms[rid]
+			if room.is_in_room(pid) or pid in room.spectators:
+				return {
+					'type': 'on_get_qubic',
+					'qubic': room.qubic
+				}
+
+
+class QubicPlaceHandler(QubicRequestHandler):
+	def _handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+		if request['type'] == 'qubic_place':
+			pid, rid = request['player_id'], request['room_id']
+			room = self.server.rooms[rid]
+			if room.is_player_turn(pid):
+				pos = request['pos']
+				room.qubic.poser(pos)
+				return {
+					'type': 'on_qubic_place',
+					'qubic': room.qubic
+				}
+
+
+def cmd(server: QubicServer):
+	def print_help():
+		print("--------------------------------------")
+		print("list : list rooms")
+		print("room #room_id : print room information")
+		print("user #user_id : print user information")
+		print("quit : quit server")
+		print("--------------------------------------")
+
+	print_help()
+	while True:
+		cmd = input("cmd :")
+		if cmd == "list":
+			server.lock.acquire()
+			print(f"Rooms ({len(server.rooms.rooms)}):")
+			for room in server.rooms.rooms:
+				print(f"{room}")
+			server.lock.release()
+		elif cmd == "list -p":
+			server.lock.acquire()
+			print(f"Players ({len(server.rooms.players)}):")
+			for player in server.rooms.players.values():
+				print(f"{player}")
+			server.lock.release()
+		elif cmd.startswith("room "):
+			try:
+				id = cmd[5:]
+				room = server.rooms[id]
+				print(room)
+			except:
+				print("Error while getting room informations")
+		elif cmd.startswith("player "):
+			try:
+				player = server.rooms.players[cmd[7:]]
+				print(player)
+			except:
+				print("Error while getting user informations")
+		elif cmd == "help":
+			print_help()
+		elif cmd == "quit":
+			print("Shutting down  server...")
+			server.shutdown()
+			server.server_close()
+		else:
+			print('unknown command')
+
+
 if __name__ == "__main__":
 	HOST, PORT = "localhost", 9999
 
-	with QubicServer((HOST, PORT), ServerRequestHandler) as server:
-		server.serve_forever()
+	server = QubicServer(("localhost", 9999), ServerRequestHandler)
+	server_thread = Thread(target=server.serve_forever)
+	# Exit the server thread when the main thread terminates
+	server_thread.start()
+	print("Server loop running in thread:", server_thread.name)
+	cmd(server)
