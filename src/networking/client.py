@@ -16,9 +16,10 @@ class Client:
 		self.room_id = None
 		self.id = id
 		if self.id is None:
+			print(f'No id, could be found, registering as new player')
 			self._register(name)
 
-	def send(self, data: Dict[str, Any], size=4096) -> Dict[str, Any]:
+	def send(self, data: Dict[str, Any], size=128000) -> Dict[str, Any]:
 		"""
 		Sends data to server
 
@@ -59,7 +60,7 @@ class Client:
 			self.id = result['player_id']
 			self.name = result['player_name']
 		except Exception as ex:
-			print(ex)
+			print(f'Client could not register:{ex}')
 			print(result)
 
 	def create(self, room_name: str) -> str:

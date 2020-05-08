@@ -37,7 +37,7 @@ class ServerRequestHandler(BaseRequestHandler):
 			encoded = data.encode()
 			self.request.sendall(encoded)
 		except Exception as e:
-			print(e)
+			print(f'Exception in handle:{e}')
 
 
 class QubicRequestHandler(ABC):
@@ -81,7 +81,7 @@ class QubicRequestHandler(ABC):
 			self.server.lock.acquire()
 			result = self._handle_request(data)
 		except Exception as e:
-			print(e)
+			print(f'Exception in handle_request:{e}')
 			result = None
 		finally:
 			self.server.lock.release()
@@ -244,6 +244,8 @@ def cmd(server: QubicServer):
 				print(player)
 			except:
 				print("Error while getting user informations")
+		elif cmd == 'clear':
+			server.rooms.remove_empty()
 		elif cmd == "help":
 			print_help()
 		elif cmd == "quit":
