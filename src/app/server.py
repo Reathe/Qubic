@@ -4,12 +4,15 @@ from threading import Thread, Lock
 from typing import Any, Tuple, Optional, Dict
 
 import jsonpickle
+from ursina import *
 
+from controls import EmptyController
+from model.qubic import Qubic
 from networking.rooms import Rooms
-
-
-# TODO: integrer une ui activable en console
 # TODO : peut-être passer en multi-threaded, 1 thread/client je sais pas si c'est utile pour l'instant
+from ui.qubic.vue_qubic import VueQubic
+
+
 class QubicServer(TCPServer, ThreadingMixIn):
 	rooms: Rooms
 
@@ -236,6 +239,11 @@ def cmd(server: QubicServer):
 				id = cmd[5:]
 				room = server.rooms[id]
 				print(room)
+				try:
+					print(room.qubic.plateau)
+					vueQub.notify(room.qubic)
+				except Exception as e:
+					print(e)
 			except:
 				print("Error while getting room informations")
 		elif cmd.startswith("player "):
@@ -252,16 +260,24 @@ def cmd(server: QubicServer):
 			print("Shutting down  server...")
 			server.shutdown()
 			server.server_close()
+
 		else:
 			print('unknown command')
 
 
 if __name__ == "__main__":
+	# HOST, PORT = "5.48.154.196", 9999
 	HOST, PORT = "localhost", 9999
-
+	window.title = 'server'
+	window.windowed_size = (500, 400)
+	server_view = Ursina()
+	Thread(target=server_view.run)
 	server = QubicServer(("localhost", 9999), ServerRequestHandler)
 	server_thread = Thread(target=server.serve_forever)
 	# Exit the server thread when the main thread terminates
 	server_thread.start()
 	print("Server loop running in thread:", server_thread.name)
-	cmd(server)
+	Thread(target=cmd, args=(server,)).start()
+	q = Qubic()
+	vueQub = VueQubic(q, EmptyController())
+	server_view.run()

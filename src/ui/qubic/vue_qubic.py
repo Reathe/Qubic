@@ -12,12 +12,13 @@ from composite import Composite
 
 
 class _Floor(Composite):
-	def __init__(self, qubic, *args, **kwargs):
+	def __init__(self, qubic, controller, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for z in range(len(qubic)):
 			for x in range(len(qubic)):
 				m = Map.MapPart(qubic,
 				                (x, 0, z),
+				                controller,
 				                model='cube',
 				                origin=(0, 0.5),
 				                position=(x, 0, z),
@@ -57,7 +58,7 @@ class _VueQubicSettings(Settings):
 class VueQubic(Composite, QubicObserver):
 	pions: List[List[List[Optional[VuePion]]]]
 
-	def __init__(self, qubic, *args, **kwargs):
+	def __init__(self, qubic, controller, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		taille = len(qubic)
 		self.qubic = qubic
@@ -66,10 +67,10 @@ class VueQubic(Composite, QubicObserver):
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
 		self.components.append(self.qamera)
-		self.board = _Floor(qubic)
+		self.board = _Floor(qubic, controller)
 		self.components.append(self.board)
 		controls_type = Controls.get_controls(self.settings.control_method)
-		self.controls = controls_type(qubic, self)
+		self.controls = controls_type(qubic, self, controller)
 		self.components.append(self.controls)
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		self.components.append(Lights())

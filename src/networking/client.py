@@ -8,6 +8,7 @@ from networking.rooms import Room
 
 
 class Client:
+	# HOST, PORT = "5.48.154.196", 9999
 	HOST, PORT = "localhost", 9999
 
 	def __init__(self, name, id=None, *args, **kwargs):
@@ -19,7 +20,7 @@ class Client:
 			print(f'No id, could be found, registering as new player')
 			self._register(name)
 
-	def send(self, data: Dict[str, Any], size=128000) -> Dict[str, Any]:
+	def send(self, data: Dict[str, Any], size=48000) -> Dict[str, Any]:
 		"""
 		Sends data to server
 
@@ -81,8 +82,7 @@ class Client:
 		try:
 			return result['room_id']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not create {ex}')
 
 	def join(self, room_id: str, spectator: bool):
 		"""
@@ -104,8 +104,7 @@ class Client:
 		try:
 			self.room_id = result['room_id']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not join {ex}')
 
 	def leave(self) -> bool:
 		if not self.room_id:
@@ -120,8 +119,7 @@ class Client:
 		try:
 			return result['success']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not leave {ex}')
 
 	def room_id_list(self) -> List[str]:
 		request = {
@@ -132,8 +130,7 @@ class Client:
 		try:
 			return result['room_id_list']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not get room id list {ex}')
 
 	def room_list(self) -> List[Room]:
 		request = {
@@ -144,8 +141,7 @@ class Client:
 		try:
 			return result['room_list']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not get room list {ex}')
 
 	def get_room(self) -> Room:
 		request = {
@@ -157,8 +153,7 @@ class Client:
 		try:
 			return result['room']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not get room {ex}')
 
 	def get_qubic(self) -> Qubic:
 		"""
@@ -176,8 +171,7 @@ class Client:
 		try:
 			return result['qubic']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not get qubic {ex}')
 
 	def qubic_place(self, pos):
 		request = {
@@ -190,5 +184,4 @@ class Client:
 		try:
 			return result['qubic']
 		except Exception as ex:
-			print(ex)
-			print(result)
+			print(f'Could not place piece in qubic {ex}')

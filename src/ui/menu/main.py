@@ -1,25 +1,23 @@
 from ursina import *
-from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
+from ursina.prefabs.dropdown_menu import DropdownMenu
 
+from controls import LocalController
 from game_modes import OneVOne
 from model.qubic import Qubic
 from composite import Composite
+from ui.general_ui import QubicButton
 from ui.menu.online import OnlineMenu
 from ui.qubic.vue_qubic import VueQubic
-
-
-class BoutonJeu(DropdownMenuButton):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
 
 
 class MainMenu(Composite):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		q = Qubic()
 		comp = (
 			self.__bouton_local(),
 			self.__button_online_game(),
-			VueQubic(Qubic()),
+			VueQubic(q, LocalController(q)),
 			self.__titre()
 		)
 		for c in comp:
@@ -36,17 +34,17 @@ class MainMenu(Composite):
 		return DropdownMenu(text='Jeu en local',
 		                    position=(0.5 * window.aspect_ratio * -0.8, 0.5),
 		                    buttons=(self.__bouton_1v1(),
-		                             BoutonJeu(text="1 vs IA")
+		                             QubicButton(text="1 vs IA")
 		                             ),
 		                    **kwargs)
 
 	def __bouton_1v1(self, **kwargs):
-		return BoutonJeu(text="1 vs 1",
-		                 on_click=lambda: (destroy(self), OneVOne()),
-		                 **kwargs)
+		return QubicButton(text="1 vs 1",
+		                   on_click=lambda: (destroy(self), OneVOne()),
+		                   **kwargs)
 
 	def __button_online_game(self, **kwargs):
-		return BoutonJeu(text="Online game",
-		                 position=(0.5 * window.aspect_ratio * -0.52, 0.5),
-		                 on_click=lambda: (destroy(self), OnlineMenu()),
-		                 **kwargs)
+		return QubicButton(text="Online game",
+		                   position=(0.5 * window.aspect_ratio * -0.52, 0.5),
+		                   on_click=lambda: (destroy(self), OnlineMenu()),
+		                   **kwargs)
