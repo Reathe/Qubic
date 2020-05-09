@@ -1,5 +1,7 @@
 from ursina import *
 
+sys.path.append("./src")
+
 from ui.menu.main import MainMenu
 
 if __name__ == '__main__':

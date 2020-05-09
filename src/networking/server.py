@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from socketserver import TCPServer, BaseRequestHandler, ThreadingMixIn
+from socketserver import TCPServer, BaseRequestHandler, ThreadingMixIn, StreamRequestHandler
 from threading import Thread, Lock
 from typing import Any, Tuple, Optional, Dict
 
@@ -22,7 +22,7 @@ class QubicServer(TCPServer, ThreadingMixIn):
 		self.lock = Lock()
 
 
-class ServerRequestHandler(BaseRequestHandler):
+class ServerRequestHandler(StreamRequestHandler):
 	server: QubicServer
 
 	def __init__(self, request: Any, client_address: Any, server: QubicServer):
@@ -33,12 +33,12 @@ class ServerRequestHandler(BaseRequestHandler):
 		# self.request is the TCP socket connected to the client
 		# host, port = self.client_address
 		try:
-			data = self.request.recv(1024).decode().strip()
+			data = self.rfile.readline().strip()
 			request = jsonpickle.decode(data)
 			result = self.qubic_handler.handle_request(request)
 			data = jsonpickle.encode(result)
 			encoded = data.encode()
-			self.request.sendall(encoded)
+			self.wfile.write(encoded)
 		except Exception as e:
 			print(f'Exception in handle:{e}')
 
@@ -210,7 +210,7 @@ class QubicPlaceHandler(QubicRequestHandler):
 				}
 
 
-def cmd(server: QubicServer):
+def cmd(server: QubicServer, vue :VueQubic):
 	def print_help():
 		print("--------------------------------------")
 		print("list : list rooms")
@@ -241,7 +241,7 @@ def cmd(server: QubicServer):
 				print(room)
 				try:
 					print(room.qubic.plateau)
-					vueQub.notify(room.qubic)
+					vue.notify(room.qubic)
 				except Exception as e:
 					print(e)
 			except:
@@ -263,21 +263,3 @@ def cmd(server: QubicServer):
 
 		else:
 			print('unknown command')
-
-
-if __name__ == "__main__":
-	# HOST, PORT = "5.48.154.196", 9999
-	HOST, PORT = "localhost", 9999
-	window.title = 'server'
-	window.windowed_size = (500, 400)
-	server_view = Ursina()
-	Thread(target=server_view.run)
-	server = QubicServer(("localhost", 9999), ServerRequestHandler)
-	server_thread = Thread(target=server.serve_forever)
-	# Exit the server thread when the main thread terminates
-	server_thread.start()
-	print("Server loop running in thread:", server_thread.name)
-	Thread(target=cmd, args=(server,)).start()
-	q = Qubic()
-	vueQub = VueQubic(q, EmptyController())
-	server_view.run()
