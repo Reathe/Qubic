@@ -1,1 +1,1 @@
-start "" "%CD%\venv\Scripts\python.exe" %CD%\main.py
+python\python.exe main.py

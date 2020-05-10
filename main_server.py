@@ -1,7 +1,10 @@
+import sys
+
+sys.path.append('src')
+
 from threading import Thread
 
 from ursina import *
-
 from controls import EmptyController
 from model.qubic import Qubic
 from networking.server import QubicServer, cmd, ServerRequestHandler

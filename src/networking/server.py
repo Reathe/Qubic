@@ -210,7 +210,7 @@ class QubicPlaceHandler(QubicRequestHandler):
 				}
 
 
-def cmd(server: QubicServer, vue :VueQubic):
+def cmd(server: QubicServer, vue: VueQubic):
 	def print_help():
 		print("--------------------------------------")
 		print("list : list rooms")
