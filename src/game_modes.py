@@ -26,12 +26,13 @@ class Online(QubicMode):
 		self.client = client
 		self.qubic = Qubic()
 		self.vue = VueQubic(self.qubic, OnlineController(self.client))
-		self.auto_update = Sequence(0.1, Func(update_qubic, self), loop=True)
+		self.auto_update = Sequence(0.1, Func(self.update_qubic), loop=True)
 		self.auto_update.start()
 
-
-def update_qubic(self):
-	obs = self.qubic.observers
-	self.qubic = self.client.get_qubic()
-	self.qubic.add_observers(*obs)
-	self.qubic.notify_observers()
+	def update_qubic(self):
+		obs = self.qubic.observers
+		self.qubic.__dict__ = self.client.get_qubic().__dict__
+		self.qubic.remove_observers()
+		self.qubic.add_observers(*obs)
+		self.qubic.notify_observers()
+		self.vue.controls.notify(self.vue.controls.curseur.pos)
