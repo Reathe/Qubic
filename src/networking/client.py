@@ -92,7 +92,8 @@ class Client:
 			room_id: the room to be joined
 			spectator: if you're joining as a spectator
 
-		Returns: the id of the room
+		Returns:
+			the id of the joined room
 		"""
 		request = {
 			'type': 'join',
@@ -103,6 +104,7 @@ class Client:
 		result = self.send(request)
 		try:
 			self.room_id = result['room_id']
+			return self.room_id
 		except Exception as ex:
 			print(f'Could not join {ex}')
 

@@ -49,6 +49,7 @@ class OnlineController(Controller):
 
 	def place_piece(self, pos):
 		if not self.client.qubic_place(pos):
+			# TODO: show to user
 			print("Place error")
 
 

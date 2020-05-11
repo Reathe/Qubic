@@ -34,13 +34,13 @@ class Room:
         Add player to room
         """
 		if player in self.players or player.id in self.spectators:
-			raise AlreadyJoined('Room')
+			raise AlreadyJoined
 		if spectator:
 			self.spectators[player.id] = player
 		elif not self.is_full():
 			self.players.append(player)
 		else:
-			raise RoomFull()
+			raise RoomFull
 
 	def leave(self, player):
 		"""
@@ -110,14 +110,19 @@ class Rooms:
 		self.players = {}
 
 	@property
-	def rooms_id(self):
+	def public_rooms_id(self):
 		"""a list of all public room ids"""
-		return [rid for rid in self._rooms if not self.rooms[rid].private]
+		return [rid for rid in self.public_rooms]
+
+	@property
+	def public_rooms(self):
+		"""a list of all public rooms"""
+		return [room for room in self._rooms.values() if not room.private]
 
 	@property
 	def rooms(self):
-		"""a list of all public rooms"""
-		return [room for room in self._rooms.values() if not room.private]
+		"""a list of all rooms"""
+		return [room for room in self._rooms.values()]
 
 	def __getitem__(self, room_id):
 		"""

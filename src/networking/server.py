@@ -1,14 +1,12 @@
 from abc import ABC, abstractmethod
-from socketserver import TCPServer, BaseRequestHandler, ThreadingMixIn, StreamRequestHandler
-from threading import Thread, Lock
+from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
+from threading import Lock
 from typing import Any, Tuple, Optional, Dict
 
 import jsonpickle
 from ursina import *
 
-from controls import EmptyController
-from model.qubic import Qubic
-from networking.rooms import Rooms
+from networking.rooms import Rooms, RoomNotFound, RoomFull, AlreadyJoined, ClientNotRegistered, NotInRoom
 # TODO : peut-être passer en multi-threaded, 1 thread/client je sais pas si c'est utile pour l'instant
 from ui.qubic.vue_qubic import VueQubic
 
@@ -40,7 +38,7 @@ class ServerRequestHandler(StreamRequestHandler):
 			encoded = data.encode()
 			self.wfile.write(encoded)
 		except Exception as e:
-			print(f'Exception in handle:{e}')
+			print(f'Not handled exeption:{e}')
 
 
 class QubicRequestHandler(ABC):
@@ -83,6 +81,11 @@ class QubicRequestHandler(ABC):
 		try:
 			self.server.lock.acquire()
 			result = self._handle_request(data)
+		except (AlreadyJoined, RoomFull, RoomNotFound, NotInRoom, ClientNotRegistered) as ex:
+			result = {
+				'type': 'error',
+				'exception': ex
+			}
 		except Exception as e:
 			print(f'Exception in handle_request:{e}')
 			result = None
@@ -157,7 +160,7 @@ class LeaveHandler(QubicRequestHandler):
 class RoomIDListHandler(QubicRequestHandler):
 	def _handle_request(self, request: Dict) -> Optional[Dict[str, Any]]:
 		if request['type'] == 'room_id_list':
-			rooms_id = self.server.rooms.rooms_id
+			rooms_id = self.server.rooms.public_rooms_id
 			return {
 				'type': 'on_room_id_list',
 				'room_id_list': rooms_id
@@ -167,7 +170,7 @@ class RoomIDListHandler(QubicRequestHandler):
 class RoomListHandler(QubicRequestHandler):
 	def _handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 		if request['type'] == 'room_list':
-			rooms = self.server.rooms.rooms
+			rooms = self.server.rooms.public_rooms
 			return {
 				'type': 'on_room_list',
 				'room_list': rooms

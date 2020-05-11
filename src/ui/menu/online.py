@@ -50,9 +50,12 @@ class OnlineMenu(Composite):
 		bd = {}
 
 		def button_online_game(room):
-			destroy(self)
-			self.client.join(room.id, False)
-			Online(self.client)
+			if self.client.join(room.id, False):
+				destroy(self)
+				Online(self.client)
+			else:
+				# TODO: show to user
+				print("Room cannot be joined")
 
 		bd['Name - Players - Specs - Other'] = lambda: 0
 		for room in self.client.room_list():
