@@ -151,7 +151,7 @@ class Qubic(QubicSubject):
 		if self.get_pion(pos) is None:
 			return False
 
-		lst = list(itertools.product([1, 0, -1], repeat=3))[:28//2]
+		lst = list(itertools.product([1, 0, -1], repeat=3))[:28 // 2]
 		axe: Tuple[int, int, int]
 		for axe in lst:
 			if self.__sum(pos, axe) + self.__sum(pos, mult_dir(-1, axe)) - 1 == self.taille:

@@ -4,6 +4,7 @@ from ursina import *
 
 from controls import Controls, Map
 from qubic_observer import QubicObserver
+from qubic_settings import Settings
 from ui.lighting import Lights
 from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
@@ -11,12 +12,13 @@ from composite import Composite
 
 
 class _Floor(Composite):
-	def __init__(self, qubic, *args, **kwargs):
+	def __init__(self, qubic, controller, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for z in range(len(qubic)):
 			for x in range(len(qubic)):
 				m = Map.MapPart(qubic,
 				                (x, 0, z),
+				                controller,
 				                model='cube',
 				                origin=(0, 0.5),
 				                position=(x, 0, z),
@@ -36,9 +38,16 @@ class _Floor(Composite):
 			sol.add_observers(*observers)
 
 
-class _VueQubicSettings:
+class _VueQubicSettings(Settings):
 	def __init__(self):
-		super().__init__()
+		super().__init__('VueQubicSettings')
+		self.center = None
+		self.vue_pion = 'Classic'
+		self.control_method = 'Mouse'
+		self.control_map_position = (99, 50)  # x and y percentage
+		self.qamera_type = QameraLocked
+
+	def default(self):
 		self.center = None
 		self.vue_pion = 'Classic'
 		self.control_method = 'Mouse'
@@ -49,20 +58,19 @@ class _VueQubicSettings:
 class VueQubic(Composite, QubicObserver):
 	pions: List[List[List[Optional[VuePion]]]]
 
-	def __init__(self, qubic, *args, **kwargs):
+	def __init__(self, qubic, controller, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		taille = len(qubic)
 		self.qubic = qubic
 		qubic.add_observers(self)
-		# TODO: controls depending on camera's position/angle
 		self.settings = _VueQubicSettings()
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
 		self.components.append(self.qamera)
-		self.board = _Floor(qubic)
+		self.board = _Floor(qubic, controller)
 		self.components.append(self.board)
 		controls_type = Controls.get_controls(self.settings.control_method)
-		self.controls = controls_type(qubic, self)
+		self.controls = controls_type(qubic, self, controller)
 		self.components.append(self.controls)
 		self.pions = [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 		self.components.append(Lights())

@@ -1,4 +1,5 @@
 import string
+from abc import ABC, abstractmethod
 from math import pi, cos, sin, atan2
 
 from ursina import *
@@ -10,17 +11,59 @@ from qubic_observer import QubicObserver, QubicSubject
 from ui.qubic.vue_pion import VuePionFactory
 
 
-class Controls(QubicObserver, Composite):
-	def __init__(self, qubic, vue, *args, **kwargs):
+def place_local(qubic, pos):
+	qubic.poser(pos)
+
+
+def place_online():
+	pass
+
+
+class Controller(ABC):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, *kwargs)
+
+	@abstractmethod
+	def place_piece(self, pos):
+		pass
+
+
+class EmptyController(Controller):
+	def place_piece(self, pos):
+		pass
+
+
+class LocalController(Controller):
+	def __init__(self, qubic, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.qubic = qubic
+
+	def place_piece(self, pos):
+		self.qubic.poser(pos)
+
+
+class OnlineController(Controller):
+	def __init__(self, client, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.client = client
+
+	def place_piece(self, pos):
+		if not self.client.qubic_place(pos):
+			print("Place error")
+
+
+class Controls(QubicObserver, Composite):
+	def __init__(self, qubic, vue, controller, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.qubic = qubic
+		self.controller = controller
 		taille = self.qubic.taille
 		self.curseur = Curseur((taille,) * 3)
 		self.vue_curseur = VuePionFactory(qubic, vue.settings.vue_pion).create_pion((0, 0, 0))
 		self.components.append(self.vue_curseur)
 		x, y = vue.settings.control_map_position
 		x, y = ((x - 50) / 100) * window.aspect_ratio, (y - 50) / 100
-		_map = Map(qubic, position=(x, y))
+		_map = Map(qubic, controller, position=(x, y))
 		_map.toggle_on_click()
 		_map.add_observers(self)
 		self.components.append(_map)
@@ -43,8 +86,8 @@ class Controls(QubicObserver, Composite):
 
 
 class ControlsKeyboard(Controls):
-	def __init__(self, qubic, vue, *args, **kwargs):
-		super().__init__(qubic, vue, *args, **kwargs)
+	def __init__(self, qubic, vue, controller, *args, **kwargs):
+		super().__init__(qubic, vue, controller, *args, **kwargs)
 		vue.qamera.add_observers(self)
 		self.angle = 0
 
@@ -64,10 +107,10 @@ class ControlsKeyboard(Controls):
 			rotates the vector by the angle relative to the x and z axis, for exemple if vect=(1,0,0)
 			and angle = pi/2, then vect will rotate by 45 degrees making a (0,0,-1) vector
 			Args:
-				vect:
-				angle:
+				vect: the initial direction vector
+				angle: the angle of rotation
 
-			Returns:
+			Returns: the new angle
 
 			"""
 			if vect == (0, 0, 0):
@@ -84,7 +127,7 @@ class ControlsKeyboard(Controls):
 			self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
 			self.maj_vue()
 		if key == 'enter':
-			self.qubic.poser(self.curseur)
+			self.controller.place_piece(self.curseur)
 			self.curseur.pos = self.qubic.get_pos_with_gravity(self.curseur)
 			self.maj_vue()
 
@@ -97,8 +140,8 @@ class ControlsKeyboard(Controls):
 
 
 class ControlsMouse(Controls):
-	def __init__(self, qubic, vue, *args, **kwargs):
-		super().__init__(qubic, vue, *args, **kwargs)
+	def __init__(self, qubic, vue, controller, *args, **kwargs):
+		super().__init__(qubic, vue, controller, *args, **kwargs)
 		vue.board.add_observers(self)
 		for c in vue.components:
 			if hasattr(c, 'toggle_on_click'):
@@ -110,24 +153,37 @@ class ControlsMouse(Controls):
 
 class Map(Composite):
 	class MapPart(QubicSubject, Button):
-		def __init__(self, qubic, real_pos, *args, **kwargs):
+		def __init__(self, qubic, real_pos, controller, *args, **kwargs):
 			super().__init__(
 				*args,
 				**kwargs
 			)
+			self.controller = controller
 			self.qubic = qubic
 			self.real_pos = real_pos
-			# tooltip
-			p = string.ascii_uppercase[real_pos[0]], real_pos[2] + 1
-			self.tooltip = Tooltip("{}{}".format(*p))
 			# toggle on click
 			self.__next = self.__controle_on_click, self.color.tint(-0.2), self.color.tint(-0.4), 1
 			self.on_click, self.highlight_color, self.pressed_color, self.pressed_scale = None, self.color, self.color, 1
 
+		@property
+		def real_pos(self):
+			return self._real_pos
+
+		@real_pos.setter
+		def real_pos(self, value):
+			self._real_pos = value
+			# tooltip
+			if len(self.qubic) <= 26:
+				p = string.ascii_uppercase[self.real_pos[0]], self.real_pos[2] + 1
+				self.tooltip = Tooltip("{}{}".format(*p))
+			else:
+				p = self.real_pos[0] + 1, self.real_pos[2] + 1
+				self.tooltip = Tooltip("{},{}".format(*p))
+
 		def __controle_on_click(self):
 			pos = self.qubic.get_pos_with_gravity(self.real_pos)
 			pos = pos[0], len(self.qubic) - 1, pos[2]
-			self.qubic.poser(pos)
+			self.controller.place_piece(pos)
 			self.notify_observers()
 
 		def toggle_on_click(self):
@@ -144,13 +200,14 @@ class Map(Composite):
 			for ob in self.observers:
 				ob.notify(self.real_pos)
 
-	def __init__(self, qubic, origin=(0.5, 0), *args, **kwargs):
+	def __init__(self, qubic, controller, origin=(0.5, 0), *args, **kwargs):
 		super().__init__(*args, **kwargs, parent=camera.ui)
 		for z in list(range(len(qubic))):
 			for x in list(range(len(qubic)))[::-1]:
 				m = self.MapPart(qubic, (x, 0, z),
+				                 controller,
 				                 model='quad',
-				                 scale=0.05,
+				                 scale=.2 / len(qubic),
 				                 texture='white_cube',
 				                 color=color.white,
 				                 parent=self)
