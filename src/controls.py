@@ -5,6 +5,7 @@ from math import pi, cos, sin, atan2
 from ursina import *
 
 from composite import Composite
+from model.IA import QubicAISettings
 from model.curseur import Curseur
 from model.direction_tools import DERRIERE, DEVANT, GAUCHE, DROITE
 from qubic_observer import QubicObserver, QubicSubject
@@ -40,6 +41,22 @@ class LocalController(Controller):
 
 	def place_piece(self, pos):
 		self.qubic.poser(pos)
+
+
+class LocalAIController(LocalController):
+	def __init__(self, qubic, *args, **kwargs):
+		super().__init__(qubic, *args, **kwargs)
+		self.settings = QubicAISettings()
+		try:
+			self.settings.load()
+		except IOError:
+			self.settings.default()
+			self.settings.save()
+		self.ai = self.settings.get_ai()
+
+	def place_piece(self, pos):
+		super().place_piece(pos)
+		self.ai.play(self.qubic)
 
 
 class OnlineController(Controller):
