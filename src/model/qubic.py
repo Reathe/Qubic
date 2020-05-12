@@ -20,7 +20,7 @@ class Qubic(QubicSubject):
 	def __init__(self, taille: int = 4, gravite: bool = True):
 		super().__init__()
 		self._plateau = Qubic.__start_plateau(taille)
-		self._posable = Qubic.__start_posable(taille)
+		self._posable = Qubic.__start_posable(taille, gravite)
 		self._pose = []
 		self._fini = False
 		self._gravite = gravite
@@ -72,6 +72,8 @@ class Qubic(QubicSubject):
 			pos: La position
 			pion: Le pion à poser
 		"""
+		if self.fini:
+			return
 		pos = pos[0], pos[1], pos[2]
 		if self._gravite:
 			pos = self.get_pos_with_gravity(pos)
@@ -80,9 +82,11 @@ class Qubic(QubicSubject):
 				pion_tour_blanc = {True: PionBlanc(), False: PionNoir()}
 				pion = pion_tour_blanc.get(self.tour_blanc())
 			self._plateau[pos[0]][pos[1]][pos[2]] = pion
-			move = pos
-			self._posable.remove(move)
-			self._pose.append(move)
+			self._posable.remove(pos)
+			if self._gravite and pos[1] < len(self) - 1:
+				next_possible = pos[0], pos[1] + 1, pos[2]
+				self._posable.append(next_possible)
+			self._pose.append(pos)
 			self.win(pos)
 			self.notify_observers()
 			# TODO: temp
@@ -133,9 +137,16 @@ class Qubic(QubicSubject):
 		return [[[None for _ in range(taille)] for _ in range(taille)] for _ in range(taille)]
 
 	@staticmethod
-	def __start_posable(taille) -> List[Tuple[int, int, int]]:
-		# noinspection PyTypeChecker
-		return list(itertools.product((_ for _ in range(taille)), repeat=3))
+	def __start_posable(taille, gravite) -> List[Tuple[int, int, int]]:
+		if gravite:
+			posable_list = []
+			for x in range(taille):
+				for z in range(taille):
+					posable_list.append((x, 0, z))
+			return posable_list
+		else:
+			# noinspection PyTypeChecker
+			return list(itertools.product((_ for _ in range(taille)), repeat=3))
 
 	def win(self, pos: Union[Tuple[int, int, int], Curseur]) -> bool:
 		"""
