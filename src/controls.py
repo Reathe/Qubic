@@ -1,6 +1,7 @@
 import string
 from abc import ABC, abstractmethod
 from math import pi, cos, sin, atan2
+from threading import Thread
 
 from ursina import *
 
@@ -48,6 +49,9 @@ class OnlineController(Controller):
 		self.client = client
 
 	def place_piece(self, pos):
+		t = Thread(target=self.__place_piece, args=(pos,)).start()
+
+	def __place_piece(self, pos):
 		if not self.client.qubic_place(pos):
 			# TODO: show to user
 			print("Place error")
