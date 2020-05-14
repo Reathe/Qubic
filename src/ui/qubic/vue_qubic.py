@@ -2,16 +2,16 @@ from typing import List, Optional
 
 from ursina import *
 
+from composite import Composite
 from controls import Controls, Map
 from qubic_observer import QubicObserver
 from qubic_settings import Settings
 from ui.lighting import Lights
 from ui.qamera.qamera_locked import QameraLocked
 from ui.qubic.vue_pion import VuePion, VuePionFactory
-from composite import Composite
 
 
-class _Floor(Composite):
+class _Board(Composite):
 	def __init__(self, qubic, controller, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for z in range(len(qubic)):
@@ -67,7 +67,7 @@ class VueQubic(Composite, QubicObserver):
 		target = (taille / 2 - .5, 0, taille / 2 - .5)
 		self.qamera = self.settings.qamera_type(target)
 		self.components.append(self.qamera)
-		self.board = _Floor(qubic, controller)
+		self.board = _Board(qubic, controller)
 		self.components.append(self.board)
 		controls_type = Controls.get_controls(self.settings.control_method)
 		self.controls = controls_type(qubic, self, controller)

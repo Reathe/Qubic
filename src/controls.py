@@ -1,23 +1,15 @@
 import string
 from abc import ABC, abstractmethod
-from math import pi, cos, sin, atan2
+from math import atan2, cos, pi, sin
 from threading import Thread
 
 from ursina import *
 
 from composite import Composite
 from model.curseur import Curseur
-from model.direction_tools import DERRIERE, DEVANT, GAUCHE, DROITE
+from model.direction_tools import DERRIERE, DEVANT, DROITE, GAUCHE
 from qubic_observer import QubicObserver, QubicSubject
 from ui.qubic.vue_pion import VuePionFactory
-
-
-def place_local(qubic, pos):
-	qubic.poser(pos)
-
-
-def place_online():
-	pass
 
 
 class Controller(ABC):
