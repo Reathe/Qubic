@@ -1,10 +1,10 @@
-from typing import Tuple, List, Optional, Union
 import itertools
+from typing import List, Optional, Tuple, Union
 
-from qubic_observer import QubicSubject
 from model.curseur import Curseur
-from model.direction_tools import mult_dir, add_dir, BAS
-from model.pion import PionBlanc, PionNoir, Pion
+from model.direction_tools import add_dir, BAS, mult_dir
+from model.pion import Pion, PionBlanc, PionNoir
+from qubic_observer import QubicSubject
 
 
 class Qubic(QubicSubject):
@@ -15,14 +15,16 @@ class Qubic(QubicSubject):
 	_posable: List[Tuple[int, int, int]]
 	_pose: List[Tuple[int, int, int]]
 	_gravite: bool
-	_fini: bool
+	_fini: Optional[Pion]
 
 	def __init__(self, taille: int = 4, gravite: bool = True):
 		super().__init__()
+		self._taille = taille
 		self._plateau = Qubic.__start_plateau(taille)
 		self._posable = Qubic.__start_posable(taille, gravite)
+		self._last_posable = None
 		self._pose = []
-		self._fini = False
+		self._fini = None
 		self._gravite = gravite
 
 	@property
@@ -31,14 +33,18 @@ class Qubic(QubicSubject):
 
 	@property
 	def fini(self) -> bool:
+		return self._fini is not None
+
+	@property
+	def winner(self) -> Optional[Pion]:
 		return self._fini
 
 	@property
 	def taille(self) -> int:
-		return len(self)
+		return self._taille
 
 	def __len__(self):
-		return len(self._plateau)
+		return self.taille
 
 	def valid_pos(self, pos: Union[Tuple[int, int, int], Curseur]) -> bool:
 		"""
@@ -48,7 +54,10 @@ class Qubic(QubicSubject):
 		Returns:
 		Vrai si la position n'est pas hors du jeu
 		"""
-		return all(map(lambda i: 0 <= i < len(self), pos))
+		for p in pos:
+			if not 0 <= p < self.taille:
+				return False
+		return True
 
 	def get_pion(self, pos: Union[Tuple[int, int, int], Curseur]) -> Optional[Pion]:
 		"""
@@ -62,7 +71,7 @@ class Qubic(QubicSubject):
 		"""
 		return self._plateau[pos[0]][pos[1]][pos[2]]
 
-	def poser(self, pos: Union[Tuple[int, int, int], Curseur], pion: Pion = None):
+	def poser(self, pos: Union[Tuple[int, int, int], Curseur], pion: Pion = None, notify=True):
 		"""
 		Pose un pion à la position pos dans le plateau si il n'y a rien
 		Le type de pion posé est celui dont c'est le tour
@@ -71,6 +80,7 @@ class Qubic(QubicSubject):
 		Args:
 			pos: La position
 			pion: Le pion à poser
+			notify: notify observers at the end
 		"""
 		if self.fini:
 			return
@@ -88,10 +98,11 @@ class Qubic(QubicSubject):
 				self._posable.append(next_possible)
 			self._pose.append(pos)
 			self.win(pos)
-			self.notify_observers()
+			if notify:
+				self.notify_observers()
+				if self.fini:
+					print(f"{self.winner.__name__} win")
 			# TODO: temp
-			if self.fini:
-				print("win {}".format(self.get_pion(pos)))
 
 	def get_pos_with_gravity(self, pos: Tuple[int, int, int]) -> Tuple[int, int, int]:
 		"""
@@ -113,24 +124,28 @@ class Qubic(QubicSubject):
 		"""
 		Returns: Vrai si c'est aux blancs de jouer, faux sinon
 		"""
-		return (len(self._pose) % 2 == 0) and len(self) ** 3 > len(self._pose)
+		return (len(self._pose) % 2 == 0) and not self.fini
 
 	def tour_noir(self) -> bool:
 		"""
 		Returns: Vrai si c'est aux noirs de jouer, faux sinon
 		"""
-		return len(self) ** 3 > len(self._pose) and not self.tour_blanc()
+		return not self.fini and not self.tour_blanc()
 
-	def annule_coup(self):
+	def annule_coup(self, notify=False):
 		"""
 		Annule le dernier coup joué si il y en a un
 		"""
 		if self._pose:
 			last = self._pose.pop()
 			self._posable.append(last)
+			if self._gravite and last[1] < len(self) - 1:
+				next_possible = last[0], last[1] + 1, last[2]
+				self._posable.remove(next_possible)
 			self.plateau[last[0]][last[1]][last[2]] = None
-			self._fini = self.win(self.pose[len(self.pose) - 1])
-			self.notify_observers()
+			self._fini = None
+			if notify:
+				self.notify_observers()
 
 	@staticmethod
 	def __start_plateau(taille) -> List[List[List[Optional[Pion]]]]:
@@ -166,9 +181,8 @@ class Qubic(QubicSubject):
 		axe: Tuple[int, int, int]
 		for axe in lst:
 			if self.__sum(pos, axe) + self.__sum(pos, mult_dir(-1, axe)) - 1 == self.taille:
-				self._fini = True
+				self._fini = PionNoir if len(self.pose) % 2 == 0 else PionBlanc
 				return self.fini
-
 		return False
 
 	def __sum(self, pos: Tuple[int, int, int], axes: Tuple[int, int, int]) -> int:
@@ -194,9 +208,9 @@ class Qubic(QubicSubject):
 		Réinitialise le plateau
 		"""
 		self._plateau = Qubic.__start_plateau(len(self))
-		self._posable = Qubic.__start_posable(len(self))
+		self._posable = Qubic.__start_posable(len(self), self._gravite)
 		self._pose = []
-		self._fini = False
+		self._fini = None
 		self.notify_observers()
 
 	@property
@@ -205,4 +219,7 @@ class Qubic(QubicSubject):
 
 	@property
 	def posable(self):
-		return self._posable
+		if self.fini:
+			return []
+		else:
+			return self._posable

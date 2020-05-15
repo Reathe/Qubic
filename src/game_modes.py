@@ -1,8 +1,9 @@
 from abc import ABC
+from random import randint
 
 from ursina import *
 
-from controls import LocalController, OnlineController, LocalAIController
+from controls import LocalAIController, LocalController, OnlineController
 from model.qubic import Qubic
 from networking.client import Client
 from ui.qubic.vue_qubic import VueQubic
@@ -38,7 +39,9 @@ class Online(QubicMode):
 
 
 class OneVSAI(QubicMode):
-	def __init__(self, *args, **kwargs):
+	def __init__(self, ai_start: bool = None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		controller = LocalAIController(self.qubic)
 		self.vue = VueQubic(self.qubic, controller)
+		if ai_start is True or (ai_start is None and randint(0, 99) < 50):
+			controller.find_and_place()
