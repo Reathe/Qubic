@@ -2,7 +2,7 @@ from ursina import *
 from ursina.prefabs.dropdown_menu import DropdownMenu
 
 from controls import LocalController
-from game_modes import OneVOne
+from game_modes import OneVOne, OneVSAI
 from model.qubic import Qubic
 from composite import Composite
 from ui.general_ui import QubicButton
@@ -34,13 +34,18 @@ class MainMenu(Composite):
 		return DropdownMenu(text='Jeu en local',
 		                    position=(0.5 * window.aspect_ratio * -0.8, 0.5),
 		                    buttons=(self.__bouton_1v1(),
-		                             QubicButton(text="1 vs IA")
+		                             self.__bouton_1vsAI()
 		                             ),
 		                    **kwargs)
 
 	def __bouton_1v1(self, **kwargs):
 		return QubicButton(text="1 vs 1",
 		                   on_click=lambda: (destroy(self), OneVOne()),
+		                   **kwargs)
+
+	def __bouton_1vsAI(self,**kwargs):
+		return QubicButton(text="1 vs AI",
+		                   on_click=lambda: (destroy(self), OneVSAI()),
 		                   **kwargs)
 
 	def __button_online_game(self, **kwargs):

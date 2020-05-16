@@ -6,6 +6,7 @@ from threading import Thread
 from ursina import *
 
 from composite import Composite
+from model.ai import QubicAISettings
 from model.curseur import Curseur
 from model.direction_tools import DERRIERE, DEVANT, DROITE, GAUCHE
 from qubic_observer import QubicObserver, QubicSubject
@@ -33,6 +34,35 @@ class LocalController(Controller):
 
 	def place_piece(self, pos):
 		self.qubic.poser(pos)
+
+
+class LocalAIController(LocalController):
+	def __init__(self, qubic, *args, **kwargs):
+		super().__init__(qubic, *args, **kwargs)
+		self.settings = QubicAISettings()
+		self.thread = None
+		try:
+			self.settings.load()
+		except IOError:
+			self.settings.default()
+			self.settings.save()
+		self.ai = self.settings.get_ai()
+
+	def place_piece(self, pos):
+		if not self.thread or not self.thread.is_alive():
+			self.thread = Thread(target=self.__place_piece, args=(pos,))
+			self.thread.start()
+
+	def __place_piece(self, pos):
+		len_pose = len(self.qubic.pose)
+		super().place_piece(pos)
+		if len(self.qubic.pose) > len_pose:
+			self.find_and_place()
+
+	def find_and_place(self):
+		pos = self.ai.play(self.qubic)
+		if pos:
+			super().place_piece(pos)
 
 
 class OnlineController(Controller):
