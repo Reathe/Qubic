@@ -8,7 +8,7 @@ from networking.rooms import Room
 
 
 class Client:
-	HOST, PORT = "5.48.154.196", 9999
+	HOST, PORT = "qubicgame.ddns.net", 9999
 	# HOST, PORT = "localhost", 9999
 
 	def __init__(self, name, id=None, *args, **kwargs):
