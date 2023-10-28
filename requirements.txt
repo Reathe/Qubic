@@ -1,4 +1,4 @@
 panda3d~=1.10.6
-numpy~=1.18.4
+numpy~=1.22
 jsonpickle~=1.4.1
 git+https://github.com/pokepetter/ursina.git
